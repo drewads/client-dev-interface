@@ -1,7 +1,5 @@
 
 
-handle = (request, response, systemRoot) => {
-
+exports.handle = (request, response, systemRoot) => {
+    return request.url;
 }
-
-exports.handle;
