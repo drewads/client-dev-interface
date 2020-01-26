@@ -22,7 +22,10 @@ exports.handle = (request, response, systemRoot) => {
     const resource = query.pathname.match(resourceRegex);
     
     // access the right resource with actions['resource']. needs to check null before access at index
-    if (resource) {
+    if (resource && actions[resource[0]]) {
         actions[resource[0]].handle(request, response, systemRoot);
+    } else {
+        // send some error with error page, probably
+        response.end();
     }
 }
