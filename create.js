@@ -1,5 +1,6 @@
 
 
 exports.handle = (request, response, systemRoot) => {
-    return request.url;
+    console.log(systemRoot + request.url);
+    response.end();
 }

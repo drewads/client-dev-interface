@@ -23,7 +23,6 @@ exports.handle = (request, response, systemRoot) => {
     
     // access the right resource with actions['resource']. needs to check null before access at index
     if (resource) {
-        console.log(actions[resource[0]].handle(request, response, systemRoot));
         actions[resource[0]].handle(request, response, systemRoot);
     }
 }
