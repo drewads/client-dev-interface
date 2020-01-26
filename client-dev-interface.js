@@ -8,7 +8,8 @@ const actions = {
     'upload' : require('./upload'),
     'move' : require('./move'),
     'delete' : require('./delete'),
-    'save' : require('./save-changes')
+    'save' : require('./save-changes'),
+    'dir-snapshot' : require('./dir-snapshot')
 };
 
 const url = require('url');
