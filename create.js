@@ -8,6 +8,7 @@ const checkBodyFormat = (body) => {
     } else return false;
 }
 
+// clean this function up, comment, and break down into smaller functions
 exports.handle = (request, response, systemRoot) => {
     if (request.method === "PUT") {
         let body = [];
@@ -30,11 +31,12 @@ exports.handle = (request, response, systemRoot) => {
                                 + (body['isDirectory'] ? '' : body['Filename']);
 
                 // use fs access to see if file already exists
-                fs.access(location, fs.constants.F_OK, (err) => {
+                fs.access(systemRoot + location, fs.constants.F_OK, (err) => {
                     if (!err) {
                         // make page to throw up maybe? prob not
                         response.writeHead(409, {'Content-Type': 'text/html'});
-                        response.write('File already exists.');
+                        response.write((body['isDirectory'] ? 'Directory' : 'File')
+                                        + ' already exists in filesystem.');
                         response.end();
                     } else {
                         if (!body['isDirectory']) {
@@ -77,17 +79,6 @@ exports.handle = (request, response, systemRoot) => {
                         }
                     }
                 })
-                /*
-                console.log(request.method + ', ' + request.url);
-                console.log('Directory: ' + body['Directory']);
-                console.log('Filename: ' + body['Filename']);
-                console.log('Is Directory: ' + body['isDirectory']);
-                console.log();
-                response.writeHead(200, {'Content-Type': 'text/plain'});
-                response.write('Data received.\n');
-                response.write(request.method + ', ' + request.url + ', ' + JSON.stringify(body));
-                response.end();
-                */
             }
         });
     } else {
