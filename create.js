@@ -8,6 +8,16 @@ const checkBodyFormat = (body) => {
     } else return false;
 }
 
+/*
+maybe make it so request methods are handled the way MDN says they should be.
+aka instead of body saying where this should go, have url say it maybe... maybe.
+
+Yes. I think all of these modules should use url to encode filepath and some metadata if necessary
+with query strings.
+
+Also, use promises instead of callbacks.
+*/
+
 // clean this function up, comment, and break down into smaller functions
 exports.handle = (request, response, systemRoot) => {
     if (request.method === "PUT") {
@@ -55,7 +65,7 @@ exports.handle = (request, response, systemRoot) => {
                                             response.end();
                                         } else {
                                             // change this at some point
-                                            response.writeHead(200, {'Content-Type': 'text/html'});
+                                            response.writeHead(201, {'Content-Type': 'text/html', 'Location': location});
                                             response.write('Success!');
                                             response.end();
                                         }
@@ -71,7 +81,7 @@ exports.handle = (request, response, systemRoot) => {
                                     response.end();
                                 } else {
                                     // change this at some point
-                                    response.writeHead(200, {'Content-Type': 'text/html'});
+                                    response.writeHead(201, {'Content-Type': 'text/html', 'Location': location});
                                     response.write('Success!');
                                     response.end();
                                 }
