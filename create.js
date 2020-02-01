@@ -9,13 +9,7 @@ const checkBodyFormat = (body) => {
 }
 
 /*
-maybe make it so request methods are handled the way MDN says they should be.
-aka instead of body saying where this should go, have url say it maybe... maybe.
-
-Yes. I think all of these modules should use url to encode filepath and some metadata if necessary
-with query strings.
-
-Also, use promises instead of callbacks.
+Use promises instead of callbacks.
 */
 
 // clean this function up, comment, and break down into smaller functions
