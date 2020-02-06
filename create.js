@@ -1,5 +1,6 @@
 const fs = require('fs');
 
+// returns true if body format is okay
 const checkBodyFormat = (body) => {
     if (body['Directory'] != undefined && body['isDirectory'] != undefined) {
         if (!body['isDirectory'] && body['Filename'] == undefined) {
