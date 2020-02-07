@@ -50,11 +50,14 @@ exports.handle = async (request, systemRoot) => {
 
             try {
                 await fsPromises.access(body['Filepath'], fs.constants.F_OK);
-                await body['isDirectory'] ? deleteDirectory(systemRoot + Body['Filepath'])
-                                            : deleteFile(systemRoot + Body['Filepath']);
             } catch (error) {
                 systemObjectNotFound();
             }
+
+            await body['isDirectory'] ? deleteDirectory(systemRoot + Body['Filepath'])
+                                            : deleteFile(systemRoot + Body['Filepath']);
+
+            // return Success object with at least recommended status code
         } else {
             throw new Error('Delete failed: request body has incorrect format.'); // status code 400, message 'request body has incorrect format'
         }
