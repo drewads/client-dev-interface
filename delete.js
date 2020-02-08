@@ -1,6 +1,9 @@
 const fs = require('fs');
 const fsPromises = fs.promises;
 
+import { Success } from './Success.js';
+import * as DevError from './DevError.js';
+
 const getBody = (request) => {
     return new Promise(resolve => {
         let body = [];
@@ -21,11 +24,22 @@ const checkBodyFormat = (body) => {
     return body['Filepath'] != undefined && body['isDirectory'] != undefined;
 }
 
+const checkObjectExists = async (filepath) => {
+    try {
+        await fsPromises.access(filepath, fs.constants.F_OK);
+    } catch (error) {
+        throw new DevError.DevError(DevError.ENOENT, 409, {}, 'delete',
+                        'Delete failed: system object does not exist.'); // status code 409
+    }
+}
+
 const deleteDirectory = async (filepath) => {
     try {
         await fsPromises.rmdir(filepath);
     } catch (error) {
-        throw new Error('Delete failed: directory could not be removed.'); // fsPromises.rmdir error (see docs)
+        // try to figure out what this error returns
+        throw new DevError.DevError(DevError.ERMENT, 500, {}, 'delete',
+                                    'Delete failed: directory could not be removed.'); // fsPromises.rmdir error (see docs)
     }
 }
 
@@ -33,12 +47,9 @@ const deleteFile = async (filepath) => {
     try {
         await fsPromises.unlink(filepath);
     } catch (error) {
-        throw new Error('Delete failed: file could not be removed');
+        throw new DevError.DevError(DevError.ERMENT, 500, {}, 'delete',
+                                    'Delete failed: file could not be removed.');
     }
-}
-
-const systemObjectNotFound = () => {
-    throw new Error('Delete failed: system object does not exist.'); // status code 409
 }
 
 exports.handle = async (request, systemRoot) => {
@@ -46,22 +57,22 @@ exports.handle = async (request, systemRoot) => {
         const body = await getBody(request);
 
         if (checkBodyFormat(body)) {
-            body['Filepath'] = systemRoot + body['Filepath'];
+            filepath = systemRoot + body['Filepath'];
 
             try {
-                await fsPromises.access(body['Filepath'], fs.constants.F_OK);
+                await checkObjectExists(filepath);
+                await body['isDirectory'] ? deleteDirectory(filepath) : deleteFile(filepath);
+                return Success(200, {}, 'delete',
+                    (body['isDirectory'] ? 'Directory' : 'File') + ' successfully deleted.')
             } catch (error) {
-                systemObjectNotFound();
+                throw error;
             }
-
-            await body['isDirectory'] ? deleteDirectory(systemRoot + Body['Filepath'])
-                                            : deleteFile(systemRoot + Body['Filepath']);
-
-            // return Success object with at least recommended status code
         } else {
-            throw new Error('Delete failed: request body has incorrect format.'); // status code 400, message 'request body has incorrect format'
+            throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete',
+                                        'Delete failed: request body has incorrect format.');
         }
     } else {
-        throw new Error('Delete failed: method not allowed.'); // status code 405
+        throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'DELETE'},
+                                    'Delete failed: method not allowed.'); // status code 405
     }
 }

@@ -1,7 +1,9 @@
 'use strict';
 
-export const EDEF = 'DEFAULT';
-
+export const EBODY = 'INCORRECT_BODY'; // http request body has incorrect format
+export const EMET = 'INCORRECT_METHOD'; // http request method not allowed
+export const ENOENT = 'ENTRY_NONEXISTENT'; // requested filesystem entry does not exist
+export const ERMENT = 'ENTRY_NOT_REMOVED'; // filesystem entry could not be removed
 
 export class DevError extends Error {
     constructor(code, statusCode, responseHeaders = {}, devModule, ...params) {
