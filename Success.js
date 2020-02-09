@@ -1,6 +1,6 @@
 'use strict';
 
-export class Success {
+exports.Success =  class Success {
     constructor(statusCode, responseHeaders = {}, devModule, message='') {
         this.statusCode = statusCode;
         this.responseHeaders = responseHeaders;

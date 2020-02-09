@@ -1,11 +1,12 @@
 'use strict';
 
-export const EBODY = 'INCORRECT_BODY'; // http request body has incorrect format
-export const EMET = 'INCORRECT_METHOD'; // http request method not allowed
-export const ENOENT = 'ENTRY_NONEXISTENT'; // requested filesystem entry does not exist
-export const ERMENT = 'ENTRY_NOT_REMOVED'; // filesystem entry could not be removed
+exports.ENORES = 'RESOURCE_NONEXISTENT'; // resource specified in request url does not exist
+exports.EBODY = 'INCORRECT_BODY'; // http request body has incorrect format
+exports.EMET = 'INCORRECT_METHOD'; // http request method not allowed
+exports.ENOENT = 'ENTRY_NONEXISTENT'; // requested filesystem entry does not exist
+exports.ERMENT = 'ENTRY_NOT_REMOVED'; // filesystem entry could not be removed
 
-export class DevError extends Error {
+exports.DevError = class DevError extends Error {
     constructor(code, statusCode, responseHeaders = {}, devModule, ...params) {
         super(params);
 

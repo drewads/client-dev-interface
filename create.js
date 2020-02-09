@@ -1,3 +1,4 @@
+'use strict';
 const fs = require('fs');
 
 // returns true if body format is okay

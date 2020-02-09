@@ -1,8 +1,9 @@
+'use strict';
 const fs = require('fs');
 const fsPromises = fs.promises;
 
-import { Success } from './Success.js';
-import * as DevError from './DevError.js';
+const Success = require('./Success');
+const DevError = require('./DevError');
 
 const getBody = (request) => {
     return new Promise(resolve => {
@@ -57,13 +58,12 @@ exports.handle = async (request, systemRoot) => {
         const body = await getBody(request);
 
         if (checkBodyFormat(body)) {
-            filepath = systemRoot + body['Filepath'];
-
+            const filepath = systemRoot + body['Filepath'];
             try {
                 await checkObjectExists(filepath);
-                await body['isDirectory'] ? deleteDirectory(filepath) : deleteFile(filepath);
-                return Success(200, {}, 'delete',
-                    (body['isDirectory'] ? 'Directory' : 'File') + ' successfully deleted.')
+                await (body['isDirectory'] ? deleteDirectory(filepath) : deleteFile(filepath));
+                return new Success.Success(200, {}, 'delete',
+                    (body['isDirectory'] ? 'Directory' : 'File') + ' successfully deleted.');
             } catch (error) {
                 throw error;
             }
