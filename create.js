@@ -14,6 +14,8 @@ const checkBodyFormat = (body) => {
 Use promises instead of callbacks.
 */
 
+// maybe make create just take file / directory name and isDirectory.
+
 // clean this function up, comment, and break down into smaller functions
 exports.handle = (request, response, systemRoot) => {
     if (request.method === "PUT") {

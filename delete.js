@@ -6,7 +6,7 @@ const Success = require('./Success');
 const DevError = require('./DevError');
 
 const getBody = (request) => {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         let body = [];
         
         request.on('data', (chunk) => {
@@ -14,14 +14,18 @@ const getBody = (request) => {
         });
 
         request.on('end', () => {
-            body = JSON.parse(Buffer.concat(body).toString());
-            resolve(body);
+            try {
+                body = JSON.parse(Buffer.concat(body).toString());
+                resolve(body);
+            } catch {
+                reject('Delete failed: request body could not be parsed as JSON.');
+            }
         });
     });
 }
 
 //returns true if body format is okay
-const checkBodyFormat = (body) => {
+const checkBodyFormat = (request, body) => {
     return body['Filepath'] != undefined && body['isDirectory'] != undefined;
 }
 
@@ -55,9 +59,11 @@ const deleteFile = async (filepath) => {
 
 exports.handle = async (request, systemRoot) => {
     if (request.method === 'DELETE') {
-        const body = await getBody(request);
 
-        if (checkBodyFormat(body)) {
+        const body = await getBody(request)
+        .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete', error);});
+
+        if (checkBodyFormat(request, body)) {
             const filepath = systemRoot + body['Filepath'];
             try {
                 await checkObjectExists(filepath);
@@ -69,10 +75,10 @@ exports.handle = async (request, systemRoot) => {
             }
         } else {
             throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete',
-                                        'Delete failed: request body has incorrect format.');
+                                    'Delete failed: request body has incorrect content type/format.');
         }
     } else {
-        throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'DELETE'},
+        throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'DELETE'}, 'delete',
                                     'Delete failed: method not allowed.'); // status code 405
     }
 }
