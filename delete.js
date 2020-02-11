@@ -1,10 +1,29 @@
+/**
+* This module exports one function, handle, which accepts an
+* HTTP request and a string indicating what the root of the
+* server filesystem is, and it deletes the file on the
+* server's filesystem that is specified in the HTTP request.
+*/
+
 'use strict';
+
 const fs = require('fs');
 const fsPromises = fs.promises;
 
 const Success = require('./Success');
 const DevError = require('./DevError');
 
+/**
+ * getBody takes an HTTP request with a JavaScript
+ * object as JSON in the body, and it returns a
+ * Promise. On success, the Promise has the
+ * JavaScript object as its value, and on
+ * failure, the Promise is rejected with a string
+ * explaining the failure.
+ * 
+ * @param {IncomingMessage} request HTTP request
+ * @return {Promise} if resolved, value is body as JavaScript object
+ */
 const getBody = (request) => {
     return new Promise((resolve, reject) => {
         let body = [];
@@ -18,67 +37,91 @@ const getBody = (request) => {
                 body = JSON.parse(Buffer.concat(body).toString());
                 resolve(body);
             } catch {
+                // this will happen if the body is not encoded as JSON
                 reject('Delete failed: request body could not be parsed as JSON.');
             }
         });
     });
 }
 
-//returns true if body format is okay
-const checkBodyFormat = (request, body) => {
+/**
+ * checkBodyFormat takes a JavaScript object, which is the HTTP request body,
+ * as input and returns a boolean. Returns true if body is formatted correctly
+ * and false otherwise.
+ * 
+ * @param {IncomingMessage} body HTTP request
+ * @return {boolean} true if body is formatted correctly and false otherwise
+ */
+const checkBodyFormat = (body) => {
     return body['Filepath'] != undefined && body['isDirectory'] != undefined;
 }
 
-const checkObjectExists = async (filepath) => {
+/**
+ * deleteObject takes as input a filepath and a boolean indicating whether
+ * the filesystem entry is a directory or not, and it deletes the given
+ * filesystem entry, using the correct method depending on whether the
+ * entry is a directory or not. A Promise is returned. If the fileystem
+ * entry does not exist, a DevError is thrown indicating so. If another
+ * error occurs and the entry could not be deleted, a general server
+ * DevError is thrown.
+ * 
+ * @param {string} filepath path to object to delete
+ * @param {boolean} isDir true if object is directory, false otherwise
+ * @return {Promise} resolved if delete successful, DevError thrown otherwise
+ */
+const deleteObject = async (filepath, isDir) => {
     try {
-        await fsPromises.access(filepath, fs.constants.F_OK);
+        // either delete directory or file
+        await (isDir ? fsPromises.rmdir(filepath) : fsPromises.unlink(filepath));
     } catch (error) {
-        throw new DevError.DevError(DevError.ENOENT, 409, {}, 'delete',
-                        'Delete failed: system object does not exist.'); // status code 409
+        if (error.code === 'ENOENT') {
+            // filesystem entry doesn't exist
+            throw new DevError.DevError(DevError.ENOENT, 409, {}, 'delete',
+                                        'Delete failed: system object does not exist.');
+        } else {
+            // otherwise, general server error
+            throw new DevError.DevError(DevError.ERMENT, 500, {}, 'delete',
+                'Delete failed: ' + (isDir ? 'directory' : 'file') + ' could not be removed.');
+        }
     }
 }
 
-const deleteDirectory = async (filepath) => {
-    try {
-        await fsPromises.rmdir(filepath);
-    } catch (error) {
-        // try to figure out what this error returns
-        throw new DevError.DevError(DevError.ERMENT, 500, {}, 'delete',
-                                    'Delete failed: directory could not be removed.'); // fsPromises.rmdir error (see docs)
-    }
-}
-
-const deleteFile = async (filepath) => {
-    try {
-        await fsPromises.unlink(filepath);
-    } catch (error) {
-        throw new DevError.DevError(DevError.ERMENT, 500, {}, 'delete',
-                                    'Delete failed: file could not be removed.');
-    }
-}
-
+/**
+ *  handle takes as input an HTTP request and a string that is the
+ * root of the server's filesystem, and it returns a Promise. This
+ * function is successful if the file described by the body of the
+ * HTTP request is deleted. Upon success, the value of the Promise
+ * is a Success object with attributes that are recommendations for
+ * the server's response. Upon failure, a DevError that is specific
+ * to the error is thrown.
+ * 
+ * @param {IncomingMessage} request HTTP request
+ * @param {string} systemRoot root of the server filesystem
+ * @return {Promise} resolved with Success object if delete successful, DevError thrown otherwise
+ */
 exports.handle = async (request, systemRoot) => {
+    // HTTP request method must be DELETE
     if (request.method === 'DELETE') {
-
-        const body = await getBody(request)
+        const body = await getBody(request) // body is a JavaScript object in the correct case
         .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete', error);});
 
-        if (checkBodyFormat(request, body)) {
-            const filepath = systemRoot + body['Filepath'];
+        // checks that the HTTP request body is formatted correctly
+        if (checkBodyFormat(body)) {
+            const filepath = systemRoot + body['Filepath']; // absolute filepath to filesystem object
             try {
-                await checkObjectExists(filepath);
-                await (body['isDirectory'] ? deleteDirectory(filepath) : deleteFile(filepath));
+                await deleteObject(filepath, body['isDirectory']);
                 return new Success.Success(200, {}, 'delete',
                     (body['isDirectory'] ? 'Directory' : 'File') + ' successfully deleted.');
             } catch (error) {
-                throw error;
+                throw error; // this is a DevError returned by deleteObject
             }
         } else {
             throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete',
                                     'Delete failed: request body has incorrect content type/format.');
         }
     } else {
+        // method not allowed
         throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'DELETE'}, 'delete',
-                                    'Delete failed: method not allowed.'); // status code 405
+                                    'Delete failed: method not allowed.');
     }
 }
