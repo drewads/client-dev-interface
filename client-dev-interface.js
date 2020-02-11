@@ -1,4 +1,4 @@
-/* 
+/**
 * This is the main module for client-dev-interface.
 * It accepts an HTTP request with URI of the form:
 * /client-dev-interface/resource.js, where "resource"
@@ -32,18 +32,22 @@ exports.Error = DevError;
 // regex to find characters after /client-dev-interface/ in a URI
 const resourceRegex = /(?<=\/client-dev-interface\/).+/;
 
-/*
-* handle accepts an HTTP request and a string that is the
-* absolute path of the directory that is considered the
-* root of the server. systemRoot will be concatenated with
-* URIs from the HTTP request to determine file and directory
-* location.
-*
-* A Success object is returned if the entire operation was
-* successful, and a DevError object is returned if the
-* operation was not successful or the requested resource
-* was not found.
-*/
+/**
+ * handle accepts an HTTP request and a string that is the
+ * absolute path of the directory that is considered the
+ * root of the server. systemRoot will be concatenated with
+ * URIs from the HTTP request to determine file and directory
+ * location.
+ *
+ * A Success object is returned if the entire operation was
+ * successful, and a DevError object is returned if the
+ * operation was not successful or the requested resource
+ * was not found.
+ * 
+ * @param {IncomingMessage} request HTTP request
+ * @param {string} systemRoot root of the server filesystem
+ * @return {Promise} resolves with Success object if successful operation, DevError thrown otherwise
+ */
 exports.handle = async (request, systemRoot) => {
     const query = url.parse(request.url, true);
 
