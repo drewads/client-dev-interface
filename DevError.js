@@ -1,11 +1,30 @@
+/**
+ * 
+ */
+
 'use strict';
 
-exports.ENORES = 'RESOURCE_NONEXISTENT'; // resource specified in request url does not exist
-exports.EBODY = 'INCORRECT_BODY'; // http request body has incorrect format
-exports.EMET = 'INCORRECT_METHOD'; // http request method not allowed
-exports.ENOENT = 'ENTRY_NONEXISTENT'; // requested filesystem entry does not exist
-exports.ERMENT = 'ENTRY_NOT_REMOVED'; // filesystem entry could not be removed
+/******************** ERROR CODES ********************/
+/** Resource specified in request url does not exist. */
+exports.ENORES = 'RESOURCE_NONEXISTENT';
+/** HTTP request body has incorrect format. */
+exports.EBODY = 'INCORRECT_BODY';
+/** HTTP request method not allowed. */
+exports.EMET = 'INCORRECT_METHOD';
+/** Requested filesystem entry does not exist. */
+exports.ENOENT = 'ENTRY_NONEXISTENT';
+/** Filesystem entry already exists. */
+exports.EENTEX = 'ENTRY_ALREADY_EXISTS';
+/** Filesystem entry could not be removed. */
+exports.ERMENT = 'ENTRY_NOT_REMOVED';
+/** Filesystem entry could not be created. */
+exports.ECRENT = 'ENTRY_NOT_CREATED';
+/** Open filesystem entry could not be closed. */
+exports.ECLOSE = 'ENTRY_NOT_CLOSED';
 
+/**
+ * 
+ */
 exports.DevError = class DevError extends Error {
     constructor(code, statusCode, responseHeaders = {}, devModule, ...params) {
         super(params);

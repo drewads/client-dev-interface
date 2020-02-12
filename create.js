@@ -1,98 +1,127 @@
-'use strict';
-const fs = require('fs');
+/**
+ * This module exports one function, handle, which accepts an
+ * HTTP request and a string indicating what the root of the
+ * server filesystem is, and it creates a new file on the
+ * server's filesystem with name and location specified by the
+ * HTTP request.
+ */
 
-// returns true if body format is okay
+'use strict';
+
+const fs = require('fs');
+const fsPromises = fs.promises;
+
+const Success = require('./Success');
+const DevError = require('./DevError');
+const util = require('./util');
+
+/**
+ * checkBodyFormat takes a JavaScript object, which is the HTTP request body,
+ * as input and returns a boolean. Returns true if body is formatted correctly
+ * and false otherwise.
+ * 
+ * @param {IncomingMessage} body HTTP request
+ * @return {boolean} true if body is formatted correctly and false otherwise
+ */
 const checkBodyFormat = (body) => {
-    if (body['Directory'] != undefined && body['isDirectory'] != undefined) {
-        if (!body['isDirectory'] && body['Filename'] == undefined) {
-            return false;
-        } else return true;
-    } else return false;
+    return body['Filepath'] != undefined && body['isDirectory'] != undefined;
 }
 
-/*
-Use promises instead of callbacks.
-*/
+/**
+ * createDirectory creates a new directory at the given filepath. createDirectory
+ * returns a Success object on success and throws a DevError on failure, which
+ * includes the case in which the directory already exists.
+ * 
+ * @param {string} path the filesystem path of the directory to be created
+ * @return {Promise} on success: resolved with Success object. on failure: rejected with a DevError.
+ */
+const createDirectory = async (path) => {
+    try {
+        await fsPromises.mkdir(path);
+    } catch (error) {
+        // handle the case of already existing path differently from other errors
+        if (error.code === 'EEXIST') {
+            throw new DevError.DevError(DevError.EENTEX, 409, {}, 'create',
+                                        'Directory already exists in filesystem.');
+        } else {
+            throw new DevError.DevError(DevError.ECRENT, 500, {}, 'create',
+                                    'Server was unable to create directory.');
+        }
+    }
 
-// maybe make create just take file / directory name and isDirectory.
+    return new Success.Success(201, {'Location': path}, 'create',
+                                    'Directory successfully created.');
+}
 
-// clean this function up, comment, and break down into smaller functions
-exports.handle = (request, response, systemRoot) => {
-    if (request.method === "PUT") {
-        let body = [];
-        
-        request.on('data', (chunk) => {
-            body.push(chunk);
-        });
+/**
+ * createFile creates a new directory at the given filepath. createFile
+ * returns a Success object on success and throws a DevError on failure, which
+ * includes the case in which the file already exists.
+ * 
+ * @param {string} path the filepath of the file to be created
+ * @return {Promise} on success: resolved with Success object. on failure: rejected with a DevError.
+ */
+const createFile = async (path) => {
+    let filehandle;
+    try {
+        // 'ax' throws error if path already exists
+        filehandle = await fsPromises.open(path, 'ax');
+    } catch (error) {
+        // handle the case of already existing path differently from other errors
+        if (error.code === 'EEXIST') {
+            throw new DevError.DevError(DevError.EENTEX, 409, {}, 'create',
+                                        'File already exists in filesystem.');
+        } else {
+            throw new DevError.DevError(DevError.ECRENT, 500, {}, 'create',
+                                    'Server was unable to create file.');
+        }
+    } try {
+        // need to close opened file
+        if (filehandle !== undefined) {
+            await filehandle.close();
+        }
+    } catch (error) {
+        // this error probably shouldn't ever occur
+        throw new DevError.DevError(DevError.ECLOSE, 500, {}, 'create',
+                                    'Server was unable to close opened file.');
+    }
 
-        request.on('end', () => {
-            body = JSON.parse(Buffer.concat(body).toString());
+    return new Success.Success(201, {'Location': path}, 'create', 'File successfully created.');
+}
 
-            if (!checkBodyFormat(body)) {
-                response.writeHead(400, 'Request body has incorrect format.');
-                response.end();
-            } else {
-                const dirPathRegex = /\/$/;     // file path ends in /
+/**
+ * handle takes as input an HTTP request and a string that is the
+ * root of the server's filesystem, and it returns a Promise. This
+ * function is successful if the file described by the body of the
+ * HTTP request is created. Upon success, the value of the Promise
+ * is a Success object with attributes that are recommendations for
+ * the server's response. Upon failure, a DevError that is specific
+ * to the error is thrown.
+ * 
+ * @param {IncomingMessage} request HTTP request
+ * @param {string} systemRoot root of the server filesystem
+ * @return {Promise} resolved with Success object if create successful, DevError thrown otherwise
+ */
+exports.handle = async (request, systemRoot) => {
+    if (request.method !== 'PUT') {
+        throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'PUT'}, 'create',
+                                    'Create failed: method not allowed.');
+    }
 
-                const location = body['Directory']
-                                + (dirPathRegex.test(body['Directory']) ? '' : '/')
-                                + (body['isDirectory'] ? '' : body['Filename']);
+    const body = await util.getBodyAsJSON(request) // body is a JavaScript object in the correct case
+    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'create', error);});
 
-                // use fs access to see if file already exists
-                fs.access(systemRoot + location, fs.constants.F_OK, (err) => {
-                    if (!err) {
-                        // make page to throw up maybe? prob not
-                        response.writeHead(409, {'Content-Type': 'text/html'});
-                        response.write((body['isDirectory'] ? 'Directory' : 'File')
-                                        + ' already exists in filesystem.');
-                        response.end();
-                    } else {
-                        if (!body['isDirectory']) {
-                            fs.open(systemRoot + location, 'a', (err, fd) => {
-                                if (err) {
-                                    // create page to throw?
-                                    response.writeHead(500, {'Content-Type': 'text/html'});
-                                    response.write('Server was unable to open file.');
-                                    response.end();
-                                } else {
-                                    fs.close(fd, (err) => {
-                                        if (err) {
-                                            // create page to throw?
-                                            response.writeHead(500, {'Content-Type': 'text/html'});
-                                            response.write('Server was unable to close file.');
-                                            response.end();
-                                        } else {
-                                            // change this at some point
-                                            response.writeHead(201, {'Content-Type': 'text/html', 'Location': location});
-                                            response.write('Success!');
-                                            response.end();
-                                        }
-                                    });
-                                }
-                            });
-                        } else {
-                            fs.mkdir(systemRoot + location, (err) => {
-                                if (err) {
-                                    // create page to throw?
-                                    response.writeHead(500, {'Content-Type': 'text/html'});
-                                    response.write('Server was unable to create directory.');
-                                    response.end();
-                                } else {
-                                    // change this at some point
-                                    response.writeHead(201, {'Content-Type': 'text/html', 'Location': location});
-                                    response.write('Success!');
-                                    response.end();
-                                }
-                            });
-                        }
-                    }
-                })
-            }
-        });
-    } else {
-        // make error page
-        response.writeHead(405, {'Content-Type': 'text/html', 'Allow': 'PUT'});
-        response.write('Error 405: Method Not Allowed');
-        response.end();
+    // checks that the HTTP request body is formatted correctly
+    if (!checkBodyFormat(body)) {
+        throw new DevError.DevError(DevError.EBODY, 400, {}, 'create',
+                                    'Create failed: request body has incorrect content type/format.');
+    }
+
+    try {
+        // create file or directory depending on value of isDir boolean
+        return await (body['isDirectory'] ? createDirectory(systemRoot + body['Filepath'])
+                                            : createFile(systemRoot + body['Filepath']));
+    } catch (error) {
+        throw error; // something went wrong during create
     }
 }

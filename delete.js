@@ -12,37 +12,7 @@ const fsPromises = fs.promises;
 
 const Success = require('./Success');
 const DevError = require('./DevError');
-
-/**
- * getBody takes an HTTP request with a JavaScript
- * object as JSON in the body, and it returns a
- * Promise. On success, the Promise has the
- * JavaScript object as its value, and on
- * failure, the Promise is rejected with a string
- * explaining the failure.
- * 
- * @param {IncomingMessage} request HTTP request
- * @return {Promise} if resolved, value is body as JavaScript object
- */
-const getBody = (request) => {
-    return new Promise((resolve, reject) => {
-        let body = [];
-        
-        request.on('data', (chunk) => {
-            body.push(chunk);
-        });
-
-        request.on('end', () => {
-            try {
-                body = JSON.parse(Buffer.concat(body).toString());
-                resolve(body);
-            } catch {
-                // this will happen if the body is not encoded as JSON
-                reject('Delete failed: request body could not be parsed as JSON.');
-            }
-        });
-    });
-}
+const util = require('./util');
 
 /**
  * checkBodyFormat takes a JavaScript object, which is the HTTP request body,
@@ -87,7 +57,7 @@ const deleteObject = async (filepath, isDir) => {
 }
 
 /**
- *  handle takes as input an HTTP request and a string that is the
+ * handle takes as input an HTTP request and a string that is the
  * root of the server's filesystem, and it returns a Promise. This
  * function is successful if the file described by the body of the
  * HTTP request is deleted. Upon success, the value of the Promise
@@ -101,27 +71,26 @@ const deleteObject = async (filepath, isDir) => {
  */
 exports.handle = async (request, systemRoot) => {
     // HTTP request method must be DELETE
-    if (request.method === 'DELETE') {
-        const body = await getBody(request) // body is a JavaScript object in the correct case
-        .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete', error);});
-
-        // checks that the HTTP request body is formatted correctly
-        if (checkBodyFormat(body)) {
-            const filepath = systemRoot + body['Filepath']; // absolute filepath to filesystem object
-            try {
-                await deleteObject(filepath, body['isDirectory']);
-                return new Success.Success(200, {}, 'delete',
-                    (body['isDirectory'] ? 'Directory' : 'File') + ' successfully deleted.');
-            } catch (error) {
-                throw error; // this is a DevError returned by deleteObject
-            }
-        } else {
-            throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete',
-                                    'Delete failed: request body has incorrect content type/format.');
-        }
-    } else {
-        // method not allowed
+    if (request.method !== 'DELETE') {
         throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'DELETE'}, 'delete',
                                     'Delete failed: method not allowed.');
+    }
+
+    const body = await util.getBodyAsJSON(request) // body is a JavaScript object in the correct case
+    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete', error);});
+    
+    // checks that the HTTP request body is formatted correctly
+    if (!checkBodyFormat(body)) {
+        throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete',
+                                    'Delete failed: request body has incorrect content type/format.');
+    }
+
+    const filepath = systemRoot + body['Filepath']; // absolute filepath to filesystem object
+    try {
+        await deleteObject(filepath, body['isDirectory']);
+        return new Success.Success(200, {}, 'delete',
+            (body['isDirectory'] ? 'Directory' : 'File') + ' successfully deleted.');
+    } catch (error) {
+        throw error; // this is a DevError returned by deleteObject
     }
 }
