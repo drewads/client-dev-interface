@@ -109,7 +109,8 @@ exports.handle = async (request, systemRoot) => {
     }
 
     const body = await util.getBodyAsJSON(request) // body is a JavaScript object in the correct case
-    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'create', error);});
+    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'create',
+                    'Create failed: ' + error);});
 
     // checks that the HTTP request body is formatted correctly
     if (!checkBodyFormat(body)) {

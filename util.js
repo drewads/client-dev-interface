@@ -29,7 +29,7 @@ exports.getBodyAsJSON = (request) => {
                 resolve(body);
             } catch {
                 // this will happen if the body is not encoded as JSON
-                reject('Delete failed: request body could not be parsed as JSON.');
+                reject('request body could not be parsed as JSON.');
             }
         });
     });
