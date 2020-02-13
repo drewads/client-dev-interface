@@ -1,5 +1,8 @@
 /**
- * 
+ * This file contains the DevError object and custom error codes
+ * for use with the DevError object. DevError extends the standard
+ * Error object, but includes some special members for use with
+ * the client-dev-interface modules.
  */
 
 'use strict';
@@ -23,7 +26,16 @@ exports.ECRENT = 'ENTRY_NOT_CREATED';
 exports.ECLOSE = 'ENTRY_NOT_CLOSED';
 
 /**
+ * This is an Error object that has its own error codes and includes
+ * extra data members on top of the standard Error type.
+ * These are:
+ * code - the DevError code, as defined in the DevError module
+ * statusCode - the recommended HTTP response status code
+ * responseHeaders - recommended HTTP response headers as a JavaScript object
+ * module - the client-dev-interface sub-module that this error originated in
+ * message - the standard message member, inherited from standard Error
  * 
+ * @extends {Error} standard error class
  */
 exports.DevError = class DevError extends Error {
     constructor(code, statusCode, responseHeaders = {}, devModule, ...params) {
