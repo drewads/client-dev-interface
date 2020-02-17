@@ -26,12 +26,25 @@ const mime = require('mime');
  * @param {string} filepath path of the file to be read
  */
 const getFileContents = async (filepath) => {
-    // use fsPromises.readFile(filepath)
-    // header has content type with mime
-    // response body is return value of readFile
-    // 404 error when nonexist
-    // 409 error if filepath is a directory
-    // make general file not read error as catch all
+    try {
+        const responseBody = await fsPromises.readFile(filepath);
+        const responseHeaders = {'Content-Type': mime.getType(path.extname(filepath))};
+        return new Success.Success(200, responseHeaders, 'edit', responseBody);
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            // doesn't exist
+            throw new DevError.DevError(DevError.ENOENT, 409, {}, 'edit',
+                                        'file does not exist');
+        } else if (error.code === 'EISDIR') {
+            // is a directory, not a regular file
+            throw new DevError.DevError(DevError.EISDIR, 409, {}, 'edit',
+                                        'filesystem entry is a directory');
+        } else {
+            // catch all; should never happen
+            throw new DevError.DevError(DevError.EREAD, 500, {}, 'edit',
+                                        'file could not be read');
+        }
+    }
 }
 
 /**
@@ -54,8 +67,9 @@ exports.handle = async (request, systemRoot) => {
         throw new DevError.DevError(DevError.EMET, 405, {}, 'edit', 'method not allowed');
     }
 
-    const query = url.parse(request.url, true).query;
+    const query = url.parse(request.url, true).query; // URL query parameters
     
+    // check that query parameters have correct format
     if (query['Filepath'] === undefined) {
         throw new DevError.DevError(DevError.EQUERY, 400, {}, 'edit', 'incorrect querystring');
     }

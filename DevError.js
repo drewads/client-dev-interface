@@ -34,6 +34,8 @@ exports.EQUERY = 'INCORRECT_QUERY_PARAMETERS';
 exports.ENOTDIR = 'ENTRY_NOT_A_DIRECTORY';
 /** Directory could not be read */
 exports.EREAD = 'DIRECTORY_NOT_READ';
+/** Filesystem entry is a directory */
+exports.EISDIR = 'ENTRY_IS_A_DIRECTORY';
 
 /**
  * This is an Error object that has its own error codes and includes
