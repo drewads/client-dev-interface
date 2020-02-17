@@ -20,7 +20,7 @@ const util = require('./util');
  * as input and returns a boolean. Returns true if body is formatted correctly
  * and false otherwise.
  * 
- * @param {IncomingMessage} body HTTP request
+ * @param {object} body HTTP request body as a JavaScript object
  * @return {boolean} true if body is formatted correctly and false otherwise
  */
 const checkBodyFormat = (body) => {
@@ -108,9 +108,12 @@ exports.handle = async (request, systemRoot) => {
                                     'Create failed: method not allowed.');
     }
 
-    const body = await util.getBodyAsJSON(request) // body is a JavaScript object in the correct case
-    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'create',
-                    'Create failed: ' + error);});
+    const body; // body is a JavaScript object in the correct case
+    try {
+        body = await util.getBodyAsJSON(request);
+    } catch (error) {
+        throw new DevError.DevError(DevError.EBODY, 400, {}, 'create', 'Create failed: ' + error);
+    }
 
     // checks that the HTTP request body is formatted correctly
     if (!checkBodyFormat(body)) {

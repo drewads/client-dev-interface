@@ -24,6 +24,8 @@ exports.ERMENT = 'ENTRY_NOT_REMOVED';
 exports.ECRENT = 'ENTRY_NOT_CREATED';
 /** Open filesystem entry could not be closed. */
 exports.ECLOSE = 'ENTRY_NOT_CLOSED';
+/** Filesystem entry could not be moved/renamed */
+exports.EMOVE = 'ENTRY_NOT_MOVED';
 
 /**
  * This is an Error object that has its own error codes and includes
@@ -38,8 +40,8 @@ exports.ECLOSE = 'ENTRY_NOT_CLOSED';
  * @extends {Error} standard error class
  */
 exports.DevError = class DevError extends Error {
-    constructor(code, statusCode, responseHeaders = {}, devModule, ...params) {
-        super(params);
+    constructor(code, statusCode, responseHeaders = {}, devModule, ...ErrorParams) {
+        super(ErrorParams);
 
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, DevError);
