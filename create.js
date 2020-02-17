@@ -49,8 +49,8 @@ const createDirectory = async (path) => {
         }
     }
 
-    return new Success.Success(201, {'Location': path}, 'create',
-                                    'Directory successfully created.');
+    return new Success.Success(201, {'Content-Type': 'text/plain', 'Location': path},
+                                    'create', 'Directory successfully created.');
 }
 
 /**
@@ -86,7 +86,8 @@ const createFile = async (path) => {
                                     'Server was unable to close opened file.');
     }
 
-    return new Success.Success(201, {'Location': path}, 'create', 'File successfully created.');
+    return new Success.Success(201, {'Content-Type': 'text/plain', 'Location': path}, 'create',
+                                'File successfully created.');
 }
 
 /**

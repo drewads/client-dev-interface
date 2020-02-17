@@ -45,7 +45,8 @@ const checkBodyFormat = (body) => {
 const moveEntry = async (oldPath, newPath) => {
     try {
         await fsPromises.rename(oldPath, newPath);
-        return new Success.Success(200, {}, 'move', 'Move successful.');
+        return new Success.Success(200, {'Content-Type': 'text/plain'}, 'move',
+                                    'Move successful.');
     } catch (error) {
         if (error.code === 'ENOENT') {
             // filesystem entry doesn't exist

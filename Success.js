@@ -11,15 +11,15 @@
  * about a successful client-dev-interface operation.
  * These data members are:
  * statusCode - the recommended HTTP response status code
- * responseHeaders - recommended HTTP response headers as a JavaScript object. Defaults to empty.
+ * responseHeaders - recommended HTTP response headers as a JavaScript object.
  * module - the client-dev-interface sub-module that this error originated in
- * message - a string with a message about the success. Defaults to the empty string.
+ * body - recommended HTTP response body.
  */
 exports.Success =  class Success {
-    constructor(statusCode, responseHeaders = {}, devModule, message='') {
+    constructor(statusCode, responseHeaders, devModule, body) {
         this.statusCode = statusCode;
         this.responseHeaders = responseHeaders;
         this.module = devModule;
-        this.message = message;
+        this.body = body;
     }
 }

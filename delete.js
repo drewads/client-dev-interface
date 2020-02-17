@@ -94,7 +94,7 @@ exports.handle = async (request, systemRoot) => {
     const filepath = systemRoot + body['Filepath']; // absolute filepath to filesystem object
     try {
         await deleteObject(filepath, body['isDirectory']);
-        return new Success.Success(200, {}, 'delete',
+        return new Success.Success(200, {'Content-Type': 'text/plain'}, 'delete',
             (body['isDirectory'] ? 'Directory' : 'File') + ' successfully deleted.');
     } catch (error) {
         throw error; // this is a DevError returned by deleteObject
