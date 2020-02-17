@@ -22,11 +22,11 @@ exports.getBodyAsJSON = (request) => {
         request.on('data', (chunk) => {
             body.push(chunk);
         });
-
+        
         request.on('end', () => {
             try {
-                body = JSON.parse(Buffer.concat(body).toString());
-                resolve(body);
+                const result = JSON.parse(Buffer.concat(body).toString());
+                resolve(result);
             } catch {
                 // this will happen if the body is not encoded as JSON
                 reject('request body could not be parsed as JSON.');

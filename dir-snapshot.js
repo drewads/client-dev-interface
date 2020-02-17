@@ -13,19 +13,7 @@ const fsPromises = fs.promises;
 
 const Success = require('./Success');
 const DevError = require('./DevError');
-const util = require('./util');
-
-/**
- * checkBodyFormat takes a JavaScript object, which is the HTTP request body,
- * as input and returns a boolean. Returns true if body is formatted correctly
- * and false otherwise.
- * 
- * @param {object} body HTTP request body as a JavaScript object
- * @return {boolean} true if body is formatted correctly and false otherwise
- */
-const checkBodyFormat = (body) => {
-    return body['Directory'] != undefined;
-}
+const url = require('url');
 
 /**
  * takeSnapshot takes one parameter - a string that is the
@@ -41,12 +29,12 @@ const checkBodyFormat = (body) => {
 const takeSnapshot = async (dirPath) => {
     try {
         // dirEntries is an array of fs.Dirent objects
-        const dirEntries = await fsPromises.readdir(dirPath, true);
-        
-        let responseBody; // an array of JavaScript objects as seen below
+        const dirEntries = await fsPromises.readdir(dirPath, {'withFileTypes': true});
+
+        let responseBody = []; // an array of JavaScript objects
         // parse array of fs.Dirent objects into array of JavaScript objects
         dirEntries.forEach((dirEntry) => {
-            responseBody.push({'path': dirEntry.name, 'isDir': dirEntry.isDirectory()});
+            responseBody.push({'name': dirEntry.name, 'isDir': dirEntry.isDirectory()});
         });
 
         return new Success.Success(200, {'Content-Type': 'application/json'}, 'dir-snapshot',
@@ -79,18 +67,14 @@ exports.handle = async (request, systemRoot) => {
                                     'method not allowed')
     }
 
-    const body = await util.getBodyAsJSON(request) // body is a JavaScript object in the correct case
-    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'dir-snapshot',
-                                                error);});
-
-    // check that the HTTP request body is formatted correctly
-    if (!checkBodyFormat(body)) {
-        throw new DevError.DevError(DevError.EBODY, 400, {}, 'dir-snapshot',
-                                    'request body has incorrect format');
+    const query = url.parse(request.url, true).query;
+    
+    if (query['Directory'] === undefined) {
+        throw new DevError.DevError(DevError.EQUERY, 400, {}, 'dir-snapshot', 'incorrect querystring');
     }
 
     try {
-        return await takeSnapshot(systemRoot + body['Directory']);
+        return await takeSnapshot(systemRoot + query['Directory']);
     } catch (error) {
         throw error;
     }

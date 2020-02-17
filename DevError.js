@@ -28,6 +28,8 @@ exports.ECLOSE = 'ENTRY_NOT_CLOSED';
 exports.EMOVE = 'ENTRY_NOT_MOVED';
 /** Directory not empty */
 exports.ENOTEMPTY = 'DIRECTORY_NOT_EMPTY';
+/** Incorrect URL query parameters */
+exports.EQUERY = 'INCORRECT_QUERY_PARAMETERS';
 
 /**
  * This is an Error object that has its own error codes and includes
