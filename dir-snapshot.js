@@ -3,7 +3,7 @@
  * HTTP request and a string indicating what the root of the
  * server filesystem is, and it takes a snapshot of a directory
  * on the server's filesystem. The directory is specified
- * in the HTTP request body.
+ * in the HTTP request URL query parameters.
  */
 
 'use strict';
@@ -73,8 +73,7 @@ const takeSnapshot = async (dirPath) => {
 exports.handle = async (request, systemRoot) => {
     // check that HTTP request method is GET
     if (request.method !== 'GET') {
-        throw new DevError.DevError(DevError.EMET, 405, {}, 'dir-snapshot',
-                                    'method not allowed')
+        throw new DevError.DevError(DevError.EMET, 405, {}, 'dir-snapshot', 'method not allowed');
     }
 
     const query = url.parse(request.url, true).query;
