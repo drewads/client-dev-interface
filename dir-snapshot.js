@@ -40,9 +40,19 @@ const takeSnapshot = async (dirPath) => {
         return new Success.Success(200, {'Content-Type': 'application/json'}, 'dir-snapshot',
                                 JSON.stringify(responseBody));
     } catch (error) {
-        console.log(error);
-        throw new DevError.DevError(DevError.ENOENT, 409, {}, 'dir-snapshot',
+        if (error.code === 'ENOTDIR') {
+            // not a directory
+            throw new DevError.DevError(DevError.ENOTDIR, 409, {}, 'dir-snapshot',
+                                    'filesystem entry is not a directory');
+        } else if (error.code === 'ENOENT') {
+            // doesn't exist
+            throw new DevError.DevError(DevError.ENOENT, 409, {}, 'dir-snapshot',
                                     'directory does not exist');
+        } else {
+            // catch all; should never happen
+            throw new DevError.DevError(DevError.EREAD, 500, {}, 'dir-snapshot',
+                                    'directory could not be read');
+        }
     }
 }
 

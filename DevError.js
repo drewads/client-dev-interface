@@ -30,6 +30,10 @@ exports.EMOVE = 'ENTRY_NOT_MOVED';
 exports.ENOTEMPTY = 'DIRECTORY_NOT_EMPTY';
 /** Incorrect URL query parameters */
 exports.EQUERY = 'INCORRECT_QUERY_PARAMETERS';
+/** Filesystem entry is not a directory */
+exports.ENOTDIR = 'ENTRY_NOT_A_DIRECTORY';
+/** Directory could not be read */
+exports.EREAD = 'DIRECTORY_NOT_READ';
 
 /**
  * This is an Error object that has its own error codes and includes
