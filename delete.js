@@ -76,12 +76,9 @@ exports.handle = async (request, systemRoot) => {
                                     'Delete failed: method not allowed.');
     }
 
-    const body; // body is a JavaScript object in the correct case
-    try {
-        body = await util.getBodyAsJSON(request);
-    } catch (error) {
-        throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete', 'Delete failed: ' + error);
-    }
+    const body = await util.getBodyAsJSON(request) // body is a JavaScript object in the correct case
+    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete',
+                                                'Delete failed: ' + error);});
     
     // checks that the HTTP request body is formatted correctly
     if (!checkBodyFormat(body)) {
