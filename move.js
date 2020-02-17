@@ -31,7 +31,7 @@ const checkBodyFormat = (body) => {
  * moveEntry conducts a filesystem entry move/rename operation with
  * fsPromises.rename(). If a file is already at the new path, this
  * function overwrites it. If a directory is at the new path, this
- * function cannot delete it, so a DevError with code EENTEX is
+ * function cannot delete it, so a DevError with code ENOTEMPTY is
  * thrown. If the filesystem entry we are trying to move does not
  * exist, a DevError with code ENOENT is thrown. If some other error
  * occurs, a DevError with code EMOVE is thrown. On success, the
@@ -43,27 +43,18 @@ const checkBodyFormat = (body) => {
  * @returns {Success} a Success object
  */
 const moveEntry = async (oldPath, newPath) => {
-    // conduct move with fsPromises.rename
-    // if a file is already at new path, it overwrites it
-    // if a directory is at new path, we throw an error (look at the error thrown by fsPromises.rename for this)
     try {
         await fsPromises.rename(oldPath, newPath);
         return new Success.Success(200, {}, 'move', 'Move successful.');
     } catch (error) {
-        // prob will have:
-        // oldPath doesnt exist error
-        // newPath already exists and is directory error
-        // prob not anything else
-        console.log(error);
-
         if (error.code === 'ENOENT') {
             // filesystem entry doesn't exist
             throw new DevError.DevError(DevError.ENOENT, 409, {}, 'move',
                                         'Move failed: filesystem entry does not exist.');
-        } else if (error.code === 'EDIRCODETHING') {
+        } else if (error.code === 'ENOTEMPTY') {
             // we are trying to move to an existing directory
-            throw new DevError.DevError(DevError.EENTEX, 409, {}, 'move',
-                                        'Move failed: attempted move to existing directory.');
+            throw new DevError.DevError(DevError.ENOTEMPTY, 409, {}, 'move',
+                                        'Move failed: attempted move to existing nonempty directory.');
         } else {
             throw new DevError.DevError(DevError.EMOVE, 500, {}, 'move',
                                     'Move failed: filesystem entry could not be moved.');

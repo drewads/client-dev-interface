@@ -26,6 +26,8 @@ exports.ECRENT = 'ENTRY_NOT_CREATED';
 exports.ECLOSE = 'ENTRY_NOT_CLOSED';
 /** Filesystem entry could not be moved/renamed */
 exports.EMOVE = 'ENTRY_NOT_MOVED';
+/** Directory not empty */
+exports.ENOTEMPTY = 'DIRECTORY_NOT_EMPTY';
 
 /**
  * This is an Error object that has its own error codes and includes

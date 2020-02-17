@@ -31,9 +31,10 @@ const checkBodyFormat = (body) => {
  * the filesystem entry is a directory or not, and it deletes the given
  * filesystem entry, using the correct method depending on whether the
  * entry is a directory or not. A Promise is returned. If the fileystem
- * entry does not exist, a DevError is thrown indicating so. If another
- * error occurs and the entry could not be deleted, a general server
- * DevError is thrown.
+ * entry does not exist, a DevError is thrown indicating so, and if the
+ * filesystem entry is a nonempty directory, a DevError is thrown
+ * indicating so. If another error occurs and the entry could not be
+ * deleted, a general server DevError is thrown.
  * 
  * @param {string} filepath path to object to delete
  * @param {boolean} isDir true if object is directory, false otherwise
@@ -48,6 +49,10 @@ const deleteObject = async (filepath, isDir) => {
             // filesystem entry doesn't exist
             throw new DevError.DevError(DevError.ENOENT, 409, {}, 'delete',
                                         'Delete failed: system object does not exist.');
+        } else if (error.code === 'ENOTEMPTY') {
+            // directory isn't empty
+            throw new DevError.DevError(DevError.ENOTEMPTY, 409, {}, 'delete',
+                                        'Delete failed: directory not empty.');
         } else {
             // otherwise, general server error
             throw new DevError.DevError(DevError.ERMENT, 500, {}, 'delete',
