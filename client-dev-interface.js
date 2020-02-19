@@ -17,7 +17,7 @@ const actions = {
     'upload' : require('./upload'),
     'move' : require('./move'),
     'delete' : require('./delete.js'),
-    'save' : require('./save-changes'),
+    'save' : require('./save'),
     'dir-snapshot' : require('./dir-snapshot')
 };
 
