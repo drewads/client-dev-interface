@@ -3,6 +3,7 @@
  * of the dev modules.
  */
 
+const path = require('path');
 
 /**
  * getBody takes an HTTP request with a JavaScript
@@ -33,4 +34,20 @@ exports.getBodyAsJSON = (request) => {
             }
         });
     });
+}
+
+
+/**
+ * This function takes two parameters, dir and root, which are both
+ * absolute filepaths, and it returns true if dir is a descendant
+ * of root or false otherwise.
+ * 
+ * @param {string} dir the absolute filepath of the potential descendant
+ * @param {string} root the absolute filepath of the potential ancestor
+ * @return {boolean} true if dir is a descendant of root
+ */
+exports.isDescendantOf = (dir, root) => {
+    const dirResolved = path.resolve(dir);      // remove .. and .
+    const rootResolved = path.resolve(root);    // remove .. and .
+    return dirResolved.startsWith(rootResolved);
 }
