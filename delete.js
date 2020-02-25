@@ -48,15 +48,15 @@ const deleteObject = async (filepath, isDir) => {
         if (error.code === 'ENOENT') {
             // filesystem entry doesn't exist
             throw new DevError.DevError(DevError.ENOENT, 409, {}, 'delete',
-                                        'Delete failed: system object does not exist.');
+                                        'system object does not exist');
         } else if (error.code === 'ENOTEMPTY') {
             // directory isn't empty
             throw new DevError.DevError(DevError.ENOTEMPTY, 409, {}, 'delete',
-                                        'Delete failed: directory not empty.');
+                                        'directory not empty');
         } else {
             // otherwise, general server error
             throw new DevError.DevError(DevError.ERMENT, 500, {}, 'delete',
-                'Delete failed: ' + (isDir ? 'directory' : 'file') + ' could not be removed.');
+                                        (isDir ? 'directory' : 'file') + ' could not be removed');
         }
     }
 }
@@ -78,30 +78,29 @@ exports.handle = async (request, systemRoot) => {
     // HTTP request method must be DELETE
     if (request.method !== 'DELETE') {
         throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'DELETE'}, 'delete',
-                                    'Delete failed: method not allowed.');
+                                    'method not allowed');
     }
 
     const body = await util.getBodyAsJSON(request) // body is a JavaScript object in the correct case
-    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete',
-                                                'Delete failed: ' + error);});
+    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete', error);});
     
     // checks that the HTTP request body is formatted correctly
     if (!checkBodyFormat(body)) {
         throw new DevError.DevError(DevError.EBODY, 400, {}, 'delete',
-                                    'Delete failed: request body has incorrect content type/format.');
+                                    'request body has incorrect content type/format');
     }
 
     const filepath = systemRoot + body['Filepath']; // absolute filepath to filesystem object
 
     // won't allow access of an ancestor of the root directory
     if (!util.isDescendantOf(filepath, systemRoot)) {
-        throw new DevError.DevError(DevError.EPATH, 400, {}, 'delete', 'Delete failed: invalid filepath.');
+        throw new DevError.DevError(DevError.EPATH, 400, {}, 'delete', 'invalid filepath');
     }
 
     try {
         await deleteObject(filepath, body['isDirectory']);
         return new Success.Success(200, {'Content-Type': 'text/plain'}, 'delete',
-            (body['isDirectory'] ? 'Directory' : 'File') + ' successfully deleted.');
+            (body['isDirectory'] ? 'directory' : 'file') + ' successfully deleted');
     } catch (error) {
         throw error; // this is a DevError returned by deleteObject
     }

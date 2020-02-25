@@ -42,15 +42,15 @@ const createDirectory = async (path) => {
         // handle the case of already existing path differently from other errors
         if (error.code === 'EEXIST') {
             throw new DevError.DevError(DevError.EENTEX, 409, {}, 'create',
-                                        'Directory already exists in filesystem.');
+                                        'directory already exists in filesystem');
         } else {
             throw new DevError.DevError(DevError.ECRENT, 500, {}, 'create',
-                                    'Server was unable to create directory.');
+                                    'server was unable to create directory');
         }
     }
 
     return new Success.Success(201, {'Content-Type': 'text/plain', 'Location': path},
-                                    'create', 'Directory successfully created.');
+                                    'create', 'directory successfully created');
 }
 
 /**
@@ -70,10 +70,10 @@ const createFile = async (path) => {
         // handle the case of already existing path differently from other errors
         if (error.code === 'EEXIST') {
             throw new DevError.DevError(DevError.EENTEX, 409, {}, 'create',
-                                        'File already exists in filesystem.');
+                                        'file already exists in filesystem');
         } else {
             throw new DevError.DevError(DevError.ECRENT, 500, {}, 'create',
-                                    'Server was unable to create file.');
+                                        'server was unable to create file');
         }
     } try {
         // need to close opened file
@@ -83,11 +83,11 @@ const createFile = async (path) => {
     } catch (error) {
         // this error probably shouldn't ever occur
         throw new DevError.DevError(DevError.ECLOSE, 500, {}, 'create',
-                                    'Server was unable to close opened file.');
+                                    'server was unable to close opened file');
     }
 
     return new Success.Success(201, {'Content-Type': 'text/plain', 'Location': path}, 'create',
-                                'File successfully created.');
+                                'file successfully created');
 }
 
 /**
@@ -105,23 +105,21 @@ const createFile = async (path) => {
  */
 exports.handle = async (request, systemRoot) => {
     if (request.method !== 'PUT') {
-        throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'PUT'}, 'create',
-                                    'Create failed: method not allowed.');
+        throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'PUT'}, 'create', 'method not allowed');
     }
 
     const body = await util.getBodyAsJSON(request) // body is a JavaScript object in the correct case
-    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'create',
-                                                'Create failed: ' + error);});
+    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'create', error);});
 
     // checks that the HTTP request body is formatted correctly
     if (!checkBodyFormat(body)) {
         throw new DevError.DevError(DevError.EBODY, 400, {}, 'create',
-                                    'Create failed: request body has incorrect content type/format.');
+                                    'request body has incorrect content type/format');
     }
 
     // won't allow access of an ancestor of the root directory
     if (!util.isDescendantOf(systemRoot + body['Filepath'], systemRoot)) {
-        throw new DevError.DevError(DevError.EPATH, 400, {}, 'create', 'Create failed: invalid filepath.');
+        throw new DevError.DevError(DevError.EPATH, 400, {}, 'create', 'invalid filepath');
     }
 
     try {

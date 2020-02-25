@@ -30,7 +30,7 @@ exports.getBodyAsJSON = (request) => {
                 resolve(result);
             } catch {
                 // this will happen if the body is not encoded as JSON
-                reject('request body could not be parsed as JSON.');
+                reject('request body could not be parsed as JSON');
             }
         });
     });

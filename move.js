@@ -45,20 +45,18 @@ const checkBodyFormat = (body) => {
 const moveEntry = async (oldPath, newPath) => {
     try {
         await fsPromises.rename(oldPath, newPath);
-        return new Success.Success(200, {'Content-Type': 'text/plain'}, 'move',
-                                    'Move successful.');
+        return new Success.Success(200, {'Content-Type': 'text/plain'}, 'move', 'move successful');
     } catch (error) {
         if (error.code === 'ENOENT') {
             // filesystem entry doesn't exist
-            throw new DevError.DevError(DevError.ENOENT, 409, {}, 'move',
-                                        'Move failed: filesystem entry does not exist.');
+            throw new DevError.DevError(DevError.ENOENT, 409, {}, 'move', 'filesystem entry does not exist');
         } else if (error.code === 'ENOTEMPTY') {
             // we are trying to move to an existing directory
             throw new DevError.DevError(DevError.ENOTEMPTY, 409, {}, 'move',
-                                        'Move failed: attempted move to existing nonempty directory.');
+                                        'attempted move to existing nonempty directory');
         } else {
             throw new DevError.DevError(DevError.EMOVE, 500, {}, 'move',
-                                    'Move failed: filesystem entry could not be moved.');
+                                        'filesystem entry could not be moved');
         }
     }
 }
@@ -79,24 +77,22 @@ const moveEntry = async (oldPath, newPath) => {
  */
 exports.handle = async (request, systemRoot) => {
     if (request.method !== 'PATCH') {
-        throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'PATCH'}, 'move',
-                                    'Move failed: method not allowed.');
+        throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'PATCH'}, 'move', 'method not allowed');
     }
 
     const body = await util.getBodyAsJSON(request) // body is a JavaScript object in the correct case
-    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'move',
-                                                'Move failed: ' + error);});
+    .catch(error => {throw new DevError.DevError(DevError.EBODY, 400, {}, 'move', error);});
 
     // check that the HTTP request body is formatted correctly
     if (!checkBodyFormat(body)) {
         throw new DevError.DevError(DevError.EBODY, 400, {}, 'move',
-                                    'Move failed: request body has incorrect content type/format.');
+                                    'request body has incorrect content type/format');
     }
 
     // won't allow access of an ancestor of the root directory
     if (!util.isDescendantOf(systemRoot + body['oldPath'], systemRoot)
         || !util.isDescendantOf(systemRoot + body['newPath'], systemRoot)) {
-        throw new DevError.DevError(DevError.EPATH, 400, {}, 'move', 'Move failed: invalid filepath.');
+        throw new DevError.DevError(DevError.EPATH, 400, {}, 'move', 'invalid filepath');
     }
 
     try {
