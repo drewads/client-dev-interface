@@ -119,6 +119,11 @@ exports.handle = async (request, systemRoot) => {
                                     'Create failed: request body has incorrect content type/format.');
     }
 
+    // won't allow access of an ancestor of the root directory
+    if (!util.isDescendantOf(systemRoot + body['Filepath'], systemRoot)) {
+        throw new DevError.DevError(DevError.EPATH, 400, {}, 'create', 'Create failed: invalid filepath.');
+    }
+
     try {
         // create file or directory depending on value of isDir boolean
         return await (body['isDirectory'] ? createDirectory(systemRoot + body['Filepath'])

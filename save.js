@@ -13,6 +13,7 @@ const Success = require('./Success');
 const DevError = require('./DevError');
 const url = require('url');
 const mime = require('mime');
+const util = require('./util');
 
 /**
  * handle takes as input an HTTP request and a string that is the
@@ -32,6 +33,8 @@ exports.handle = (request, systemRoot) => {
     // check that method is PUT
 
     // parse url query parameters to get Filepath parameter. make sure Filepath parameter exists.
+
+    // check to make sure location we are saving to doesn't require access to an ancestor of the root
 
     // MAKE SURE TO CHECK THAT FILE TYPE MATCHES CONTENT-TYPE HEADER
 

@@ -93,6 +93,12 @@ exports.handle = async (request, systemRoot) => {
                                     'Move failed: request body has incorrect content type/format.');
     }
 
+    // won't allow access of an ancestor of the root directory
+    if (!util.isDescendantOf(systemRoot + body['oldPath'], systemRoot)
+        || !util.isDescendantOf(systemRoot + body['newPath'], systemRoot)) {
+        throw new DevError.DevError(DevError.EPATH, 400, {}, 'move', 'Move failed: invalid filepath.');
+    }
+
     try {
         return await moveEntry(systemRoot + body['oldPath'], systemRoot + body['newPath']);
     } catch (error) {

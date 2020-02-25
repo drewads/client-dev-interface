@@ -92,6 +92,12 @@ exports.handle = async (request, systemRoot) => {
     }
 
     const filepath = systemRoot + body['Filepath']; // absolute filepath to filesystem object
+
+    // won't allow access of an ancestor of the root directory
+    if (!util.isDescendantOf(filepath, systemRoot)) {
+        throw new DevError.DevError(DevError.EPATH, 400, {}, 'delete', 'Delete failed: invalid filepath.');
+    }
+
     try {
         await deleteObject(filepath, body['isDirectory']);
         return new Success.Success(200, {'Content-Type': 'text/plain'}, 'delete',

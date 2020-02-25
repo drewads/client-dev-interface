@@ -14,6 +14,7 @@ const fsPromises = fs.promises;
 const Success = require('./Success');
 const DevError = require('./DevError');
 const url = require('url');
+const util = require('./util');
 
 /**
  * takeSnapshot takes one parameter - a string that is the
@@ -80,6 +81,11 @@ exports.handle = async (request, systemRoot) => {
     
     if (query['Directory'] === undefined) {
         throw new DevError.DevError(DevError.EQUERY, 400, {}, 'dir-snapshot', 'incorrect querystring');
+    }
+
+    // won't allow access of an ancestor of the root directory
+    if (!util.isDescendantOf(systemRoot + query['Directory'], systemRoot)) {
+        throw new DevError.DevError(DevError.EPATH, 400, {}, 'dir-snapshot', 'invalid filepath');
     }
 
     try {

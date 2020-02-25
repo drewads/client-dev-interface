@@ -36,6 +36,8 @@ exports.ENOTDIR = 'ENTRY_NOT_A_DIRECTORY';
 exports.EREAD = 'DIRECTORY_NOT_READ';
 /** Filesystem entry is a directory */
 exports.EISDIR = 'ENTRY_IS_A_DIRECTORY';
+/** Invalid filepath */
+exports.EPATH = 'FILEPATH_INVALID';
 
 /**
  * This is an Error object that has its own error codes and includes

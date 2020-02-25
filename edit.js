@@ -15,6 +15,7 @@ const Success = require('./Success');
 const DevError = require('./DevError');
 const url = require('url');
 const mime = require('mime');
+const util = require('./util');
 
 /**
  * getFileContents reads the contents of a file and returns a
@@ -72,6 +73,11 @@ exports.handle = async (request, systemRoot) => {
     // check that query parameters have correct format
     if (query['Filepath'] === undefined) {
         throw new DevError.DevError(DevError.EQUERY, 400, {}, 'edit', 'incorrect querystring');
+    }
+
+    // won't allow access of an ancestor of the root directory
+    if (!util.isDescendantOf(systemRoot + query['Filepath'], systemRoot)) {
+        throw new DevError.DevError(DevError.EPATH, 400, {}, 'edit', 'invalid filepath');
     }
 
     try {
