@@ -6,7 +6,29 @@
 const path = require('path');
 
 /**
- * getBody takes an HTTP request with a JavaScript
+ * getBody takes an HTTP request as input, and it
+ * returns a Promise. When the HTTP request ends,
+ * the Promise has the body as a string as its value.
+ * 
+ * @param {IncomingMessage} request HTTP request
+ * @return {Promise} when resolved, value is body as JavaScript object
+ */
+exports.getBody = (request) => {
+    return new Promise((resolve) => {
+        let body = [];
+        
+        request.on('data', (chunk) => {
+            body.push(chunk);
+        });
+        
+        request.on('end', () => {
+            resolve(Buffer.concat(body).toString());
+        });
+    });
+}
+
+/**
+ * getBodyAsJSON takes an HTTP request with a JavaScript
  * object as JSON in the body, and it returns a
  * Promise. On success, the Promise has the
  * JavaScript object as its value, and on
@@ -16,24 +38,13 @@ const path = require('path');
  * @param {IncomingMessage} request HTTP request
  * @return {Promise} if resolved, value is body as JavaScript object
  */
-exports.getBodyAsJSON = (request) => {
-    return new Promise((resolve, reject) => {
-        let body = [];
-        
-        request.on('data', (chunk) => {
-            body.push(chunk);
-        });
-        
-        request.on('end', () => {
-            try {
-                const result = JSON.parse(Buffer.concat(body).toString());
-                resolve(result);
-            } catch {
-                // this will happen if the body is not encoded as JSON
-                reject('request body could not be parsed as JSON');
-            }
-        });
-    });
+exports.getBodyAsJSON = async (request) => {
+    try {
+        return JSON.parse(await this.getBody(request));
+    } catch {
+        // this will happen if the body is not encoded as JSON
+        throw 'request body could not be parsed as JSON';
+    }
 }
 
 

@@ -27,16 +27,31 @@ const util = require('./util');
  * @param {string} systemRoot root of server filesystem
  * @return {Promise} resolved with Success object if operation successful, DevError thrown otherwise
  */
-exports.handle = (request, systemRoot) => {
+exports.handle = async (request, systemRoot) => {
     // USE THE EDIT DEV MODULE AS A GUIDE FOR THIS ONE
 
-    // check that method is PUT
+    // check that HTTP request method is PUT
+    if (request.method !== 'PUT') {
+        throw new DevError.DevError(DevError.EMET, 405, {}, 'save', 'method not allowed');
+    }
 
-    // parse url query parameters to get Filepath parameter. make sure Filepath parameter exists.
+    const query = url.parse(request.url, true).query; // URL query parameters
+    // check that query parameters have correct format
+    if (query['Filepath'] === undefined) {
+        throw new DevError.DevError(DevError.EQUERY, 400, {}, 'save', 'incorrect querystring');
+    }
 
-    // check to make sure location we are saving to doesn't require access to an ancestor of the root
+    // won't allow access of an ancestor of the root directory
+    if (!util.isDescendantOf(systemRoot + query['Filepath'], systemRoot)) {
+        throw new DevError.DevError(DevError.EPATH, 400, {}, 'save', 'invalid filepath');
+    }
 
     // MAKE SURE TO CHECK THAT FILE TYPE MATCHES CONTENT-TYPE HEADER
+    // what if file has no extension? probably wants undefined content-type?
+    // check what happens in edit dev module when file has no extension
+
+    // get body with util.getBody
+    const body = await util.getBody(request);
 
     // use fsPromises.writeFile to write the HTTP request body to the specified file
 }

@@ -29,7 +29,7 @@ const util = require('./util');
 const getFileContents = async (filepath) => {
     try {
         const responseBody = await fsPromises.readFile(filepath);
-        const responseHeaders = {'Content-Type': mime.getType(path.extname(filepath))};
+        const responseHeaders = {'Content-Type': mime.getType(path.extname(filepath))}; // check what happens when file has no extension
         return new Success.Success(200, responseHeaders, 'edit', responseBody);
     } catch (error) {
         if (error.code === 'ENOENT') {
