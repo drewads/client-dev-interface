@@ -92,7 +92,7 @@ exports.handle = async (request, systemRoot) => {
 
     const filepath = systemRoot + body['Filepath']; // absolute filepath to filesystem object
 
-    // won't allow access of an ancestor of the root directory
+    // won't allow access to an ancestor of the root directory
     if (!util.isDescendantOf(filepath, systemRoot)) {
         throw new DevError.DevError(DevError.EPATH, 400, {}, 'delete', 'invalid filepath');
     }

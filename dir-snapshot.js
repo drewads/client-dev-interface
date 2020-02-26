@@ -84,7 +84,7 @@ exports.handle = async (request, systemRoot) => {
         throw new DevError.DevError(DevError.EQUERY, 400, {}, 'dir-snapshot', 'incorrect querystring');
     }
 
-    // won't allow access of an ancestor of the root directory
+    // won't allow access to an ancestor of the root directory
     if (!util.isDescendantOf(systemRoot + query['Directory'], systemRoot)) {
         throw new DevError.DevError(DevError.EPATH, 400, {}, 'dir-snapshot', 'invalid filepath');
     }

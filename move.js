@@ -89,7 +89,7 @@ exports.handle = async (request, systemRoot) => {
                                     'request body has incorrect content type/format');
     }
 
-    // won't allow access of an ancestor of the root directory
+    // won't allow access to an ancestor of the root directory
     if (!util.isDescendantOf(systemRoot + body['oldPath'], systemRoot)
         || !util.isDescendantOf(systemRoot + body['newPath'], systemRoot)) {
         throw new DevError.DevError(DevError.EPATH, 400, {}, 'move', 'invalid filepath');
