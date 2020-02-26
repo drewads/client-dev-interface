@@ -18,7 +18,8 @@ const actions = {
     'move' : require('./move'),
     'delete' : require('./delete.js'),
     'save' : require('./save'),
-    'dir-snapshot' : require('./dir-snapshot')
+    'dir-snapshot' : require('./dir-snapshot'),
+    'exists' : require('./exists')
 };
 
 const url = require('url');

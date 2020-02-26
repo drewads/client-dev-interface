@@ -65,7 +65,7 @@ const getFileContents = async (filepath) => {
 exports.handle = async (request, systemRoot) => {
     // check that HTTP request method is GET
     if (request.method !== 'GET') {
-        throw new DevError.DevError(DevError.EMET, 405, {}, 'edit', 'method not allowed');
+        throw new DevError.DevError(DevError.EMET, 405, {'Allow': 'GET'}, 'edit', 'method not allowed');
     }
 
     const query = url.parse(request.url, true).query; // URL query parameters

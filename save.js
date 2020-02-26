@@ -59,7 +59,7 @@ const saveFile = async (filepath, body) => {
 exports.handle = async (request, systemRoot) => {
     // check that HTTP request method is PUT
     if (request.method !== 'PUT') {
-        throw new DevError.DevError(DevError.EMET, 405, {}, 'save', 'method not allowed');
+        throw new DevError.DevError(DevError.EMET, 405, {'Allow': 'PUT'}, 'save', 'method not allowed');
     }
 
     const query = url.parse(request.url, true).query; // URL query parameters

@@ -74,7 +74,8 @@ const takeSnapshot = async (dirPath) => {
 exports.handle = async (request, systemRoot) => {
     // check that HTTP request method is GET
     if (request.method !== 'GET') {
-        throw new DevError.DevError(DevError.EMET, 405, {}, 'dir-snapshot', 'method not allowed');
+        throw new DevError.DevError(DevError.EMET, 405, {'Allow': 'GET'}, 'dir-snapshot',
+                                    'method not allowed');
     }
 
     const query = url.parse(request.url, true).query;
