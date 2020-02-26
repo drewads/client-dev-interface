@@ -32,8 +32,10 @@ exports.ENOTEMPTY = 'DIRECTORY_NOT_EMPTY';
 exports.EQUERY = 'INCORRECT_QUERY_PARAMETERS';
 /** Filesystem entry is not a directory */
 exports.ENOTDIR = 'ENTRY_NOT_A_DIRECTORY';
-/** Directory could not be read */
-exports.EREAD = 'DIRECTORY_NOT_READ';
+/** Filesystem entry could not be read */
+exports.EREAD = 'ENTRY_NOT_READ';
+/** File could not be written to */
+exports.EWRITE = 'FILE_NOT_WRITTEN';
 /** Filesystem entry is a directory */
 exports.EISDIR = 'ENTRY_IS_A_DIRECTORY';
 /** Invalid filepath */

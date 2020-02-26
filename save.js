@@ -12,8 +12,38 @@ const fsPromises = fs.promises;
 const Success = require('./Success');
 const DevError = require('./DevError');
 const url = require('url');
-const mime = require('mime');
 const util = require('./util');
+
+/**
+ * saveFile writes the string data given as the body parameter to the
+ * file at the filepath specified by the filepath parameter. This returns
+ * a Promise. A DevError is thrown when an error occurs. The possible
+ * errors thrown are ENOENT, EISDIR, and EWRITE.
+ * 
+ * @param {string} filepath absolute path to the file to write to
+ * @param {string} body the string data to write
+ * @returns {Promise} Promise resolved on success, rejected upon error
+ */
+const saveFile = async (filepath, body) => {
+    // use fsPromises.writeFile to write the HTTP request body to the specified file
+    try {
+        await fsPromises.writeFile(filepath, body);
+        return new Success.Success(200, {'Content-Type': 'text/plain'}, 'save', 'file successfully saved');
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            // doesn't exist
+            throw new DevError.DevError(DevError.ENOENT, 409, {}, 'save',
+                                        'file does not exist');
+        } else if (error.code === 'EISDIR') {
+            // is a directory, not a regular file
+            throw new DevError.DevError(DevError.EISDIR, 409, {}, 'save',
+                                        'filesystem entry is a directory');
+        } else {
+            // catch all; should never happen
+            throw new DevError.DevError(DevError.EWRITE, 500, {}, 'save', 'file could not be saved');
+        }
+    }
+}
 
 /**
  * handle takes as input an HTTP request and a string that is the
@@ -23,13 +53,14 @@ const util = require('./util');
  * recommendations for the server's response. Upon failure, a DevError
  * that is specific to the error is thrown.
  * 
+ * This function does **not** check to make sure the HTTP request
+ * `Content-Type` header matches the given file's extension.
+ * 
  * @param {IncomingMessage} request HTTP request
  * @param {string} systemRoot root of server filesystem
  * @return {Promise} resolved with Success object if operation successful, DevError thrown otherwise
  */
 exports.handle = async (request, systemRoot) => {
-    // USE THE EDIT DEV MODULE AS A GUIDE FOR THIS ONE
-
     // check that HTTP request method is PUT
     if (request.method !== 'PUT') {
         throw new DevError.DevError(DevError.EMET, 405, {}, 'save', 'method not allowed');
@@ -41,17 +72,16 @@ exports.handle = async (request, systemRoot) => {
         throw new DevError.DevError(DevError.EQUERY, 400, {}, 'save', 'incorrect querystring');
     }
 
+    const filepath = systemRoot + query['Filepath'];
     // won't allow access of an ancestor of the root directory
-    if (!util.isDescendantOf(systemRoot + query['Filepath'], systemRoot)) {
+    if (!util.isDescendantOf(filepath, systemRoot)) {
         throw new DevError.DevError(DevError.EPATH, 400, {}, 'save', 'invalid filepath');
     }
 
-    // MAKE SURE TO CHECK THAT FILE TYPE MATCHES CONTENT-TYPE HEADER
-    // what if file has no extension? probably wants undefined content-type?
-    // check what happens in edit dev module when file has no extension
-
-    // get body with util.getBody
-    const body = await util.getBody(request);
-
-    // use fsPromises.writeFile to write the HTTP request body to the specified file
+    try {
+        // saves HTTP request body to file at the location specified by filepath
+        await saveFile(filepath, await util.getBody(request));
+    } catch (error) {
+        throw error;
+    }
 }
