@@ -18,7 +18,7 @@ const util = require('./util');
  * saveFile writes the string data given as the body parameter to the
  * file at the filepath specified by the filepath parameter. This returns
  * a Promise. A DevError is thrown when an error occurs. The possible
- * errors thrown are ENOENT, EISDIR, and EWRITE.
+ * errors thrown are EISDIR and EWRITE.
  * 
  * @param {string} filepath absolute path to the file to write to
  * @param {string} body the string data to write
@@ -30,11 +30,7 @@ const saveFile = async (filepath, body) => {
         await fsPromises.writeFile(filepath, body);
         return new Success.Success(200, {'Content-Type': 'text/plain'}, 'save', 'file successfully saved');
     } catch (error) {
-        if (error.code === 'ENOENT') {
-            // doesn't exist
-            throw new DevError.DevError(DevError.ENOENT, 409, {}, 'save',
-                                        'file does not exist');
-        } else if (error.code === 'EISDIR') {
+        if (error.code === 'EISDIR') {
             // is a directory, not a regular file
             throw new DevError.DevError(DevError.EISDIR, 409, {}, 'save',
                                         'filesystem entry is a directory');
@@ -80,7 +76,7 @@ exports.handle = async (request, systemRoot) => {
 
     try {
         // saves HTTP request body to file at the location specified by filepath
-        await saveFile(filepath, await util.getBody(request));
+        return await saveFile(filepath, await util.getBody(request));
     } catch (error) {
         throw error;
     }
