@@ -23,6 +23,7 @@ const actions = {
 };
 
 const url = require('url');
+const os = require('os');
 const Success = require('./Success');   // gives access to Success object
 const DevError = require('./DevError'); // gives access to DevError object and error codes
 
@@ -34,9 +35,10 @@ exports.Error = DevError;
 const resourceRegex = /(?<=\/client-dev-interface\/).+/;
 
 /**
- * handle accepts an HTTP request and a string that is the
+ * handle accepts an HTTP request, a string that is the
  * absolute path of the directory that is considered the
- * root of the server. systemRoot will be concatenated with
+ * root of the server, and optionally the directory to use
+ * for temporary files. systemRoot will be concatenated with
  * URIs from the HTTP request to determine file and directory
  * location.
  *
@@ -47,9 +49,10 @@ const resourceRegex = /(?<=\/client-dev-interface\/).+/;
  * 
  * @param {IncomingMessage} request HTTP request
  * @param {string} systemRoot root of the server filesystem
+ * @param {string} tmpDir optional directory to use for temporary files -- used by upload module
  * @return {Promise} resolves with Success object if successful operation, DevError thrown otherwise
  */
-exports.handle = async (request, systemRoot) => {
+exports.handle = async (request, systemRoot, tmpDir = os.tmpdir()) => {
     const query = url.parse(request.url, true);
 
     // find part of the url after /client-dev-interface
@@ -59,8 +62,10 @@ exports.handle = async (request, systemRoot) => {
     // checks that resource is not null before access at index
     if (resource && resource[0] && actions[resource[0]]) {
         try {
-            // this will be a Success object
-            return await actions[resource[0]].handle(request, systemRoot);
+            // this will be a Success object. check based on upload module for passing temp dir
+            return await (resource[0] === 'upload' ?
+                            actions[resource[0]].handle(request, systemRoot, tmpDir)
+                            : actions[resource[0]].handle(request, systemRoot));
         } catch (error) {
             // this will be a DevError object
             throw error;
