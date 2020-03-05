@@ -55,6 +55,7 @@ const moveEntry = async (oldPath, newPath) => {
             throw new DevError.DevError(DevError.ENOTEMPTY, 409, {}, 'move',
                                         'attempted move to existing nonempty directory');
         } else {
+            // if all else fails
             throw new DevError.DevError(DevError.EMOVE, 500, {}, 'move',
                                         'filesystem entry could not be moved');
         }

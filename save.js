@@ -20,6 +20,8 @@ const util = require('./util');
  * a Promise. A DevError is thrown when an error occurs. The possible
  * errors thrown are EISDIR and EWRITE.
  * 
+ * Data must be UTF-8 encoded.
+ * 
  * @param {string} filepath absolute path to the file to write to
  * @param {string} body the string data to write
  * @returns {Promise} Promise resolved on success, rejected upon error
