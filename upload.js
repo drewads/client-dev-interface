@@ -16,11 +16,16 @@ const util = require('./util');
 const formidable = require('formidable');
 
 /**
+ * parseForm parses the HTTP request body as multipart/form-data,
+ * and returns a Promise that is resolved upon success. The value
+ * of the Promise upon success is a javascript object with keys
+ * fields and files, with values that are the fields and files
+ * from the multipart/form-data, respectively. On a parsing error,
+ * the Promise is rejected with a DevError.
  * 
- * 
- * @param {IncomingMessage} request 
+ * @param {IncomingMessage} request the HTTP request
  * @param {string} tmpDir path to the directory used for temporary files
- * @return {Promise}
+ * @return {Promise} resolved if form was parsed, rejected with DevError if error occurred
  */
 const parseForm = async (request, tmpDir) => {
     const formParser = new formidable.IncomingForm({multiples: true, uploadDir: tmpDir});
@@ -38,9 +43,12 @@ const parseForm = async (request, tmpDir) => {
 }
 
 /**
+ * getFilepaths returns a javascript object with keys that are
+ * the filepaths input as arguments to this function and with
+ * values that are the files input as arguments to this function.
  * 
- * @param {*} files <-- figure out what type this is
- * @param {*} filepaths 
+ * @param {Files} files
+ * @param {string[]} filepaths 
  */
 const getFilepaths = (files, filepaths) => {
     const locations = {};
@@ -51,9 +59,13 @@ const getFilepaths = (files, filepaths) => {
 }
 
 /**
- * 
- * @param {*} files 
- * @param {*} systemRoot 
+ * renameFiles renames the files passed as input to move them from the temporary
+ * directory to their final location. It returns a Promise which is resolved with
+ * a Success object upon Success and a DevError with message containing a JSON-
+ * stringified object of file locations on failure.
+ *  
+ * @param {Files} files 
+ * @param {string} systemRoot path to the root directory
  */
 const renameFiles = async (files, systemRoot) => {
     const filepaths = Object.keys(files);
@@ -61,7 +73,7 @@ const renameFiles = async (files, systemRoot) => {
 
     for (const filepath of filepaths) {
         if (!util.isDescendantOf(systemRoot + filepath, systemRoot)) {
-            throw new DevError.DevError(DevError.EPATH, 400, {}, 'upload', 'invalid filepath');
+            throw new DevError.DevError(DevError.EPATH, 400, {}, 'upload', JSON.stringify(locations));
         }
 
         try {
@@ -78,9 +90,25 @@ const renameFiles = async (files, systemRoot) => {
 }
 
 /**
+ * handle carries out the upload operation given an HTTP request,
+ * the filepath to the root directory, and the directory in which
+ * to store temporary files. It returns a Promise that is resolved
+ * with a Success object upon success and is rejected with a DevError
+ * on failure. Some failures may cause files to be saved to the
+ * temporary directory but not moved to their desired location. In
+ * these cases, handle should reject with a DevError that has
+ * message field containing a JSON-stringified object with all of the
+ * locations of the uploaded files.
  * 
+ * The following errors cause such a thing to happen:
+ * EPATH
+ * EMOVE
+ * 
+ * @param {IncomingMessage} request HTTP request
+ * @param {string} systemRoot filepath of the root directory
+ * @param {string} tmpDir filepath of the directory to put temporary files
  */
-exports.handle = (request, systemRoot, tmpDir) => {
+exports.handle = async (request, systemRoot, tmpDir) => {
     // HTTP request method must be PUT
     if (request.method !== 'PUT') {
         throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'PUT'}, 'upload', 'method not allowed');
