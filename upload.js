@@ -73,12 +73,14 @@ const renameFiles = async (files, systemRoot) => {
 
     for (const filepath of filepaths) {
         if (!util.isDescendantOf(systemRoot + filepath, systemRoot)) {
+            // the message of this error is unique - it is a JSON stringified object of file locations
             throw new DevError.DevError(DevError.EPATH, 400, {}, 'upload', JSON.stringify(locations));
         }
 
         try {
             await fsPromises.rename(files[filepath].path, systemRoot + filepath);
         } catch (error) {
+            console.log(error);
             // the message of this error is unique - it is a JSON stringified object of file locations
             throw new DevError.DevError(DevError.EMOVE, 500, {}, 'upload', JSON.stringify(locations));
         }
@@ -116,7 +118,7 @@ exports.handle = async (request, systemRoot, tmpDir) => {
 
     let body; // parsed multipart/form-data
     try {
-        body = parseForm(request, tmpDir);
+        body = await parseForm(request, tmpDir);
     } catch (error) {
         throw error;
     }
