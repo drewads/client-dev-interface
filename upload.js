@@ -30,9 +30,8 @@ const formidable = require('formidable');
 const parseForm = async (request, tmpDir) => {
     const formParser = new formidable.IncomingForm({multiples: true, uploadDir: tmpDir});
     return new Promise((resolve, reject) => {
-        formParser.parse(request, (err, fields, files) => {
-            if (err) {
-                console.log(err);
+        formParser.parse(request, (error, fields, files) => {
+            if (error) {
                 reject(new DevError.DevError(DevError.EBODY, 400, {}, 'delete',
                                             'request body has incorrect format'));
             } else {
@@ -66,6 +65,7 @@ const getFilepaths = (files, filepaths) => {
  *  
  * @param {Files} files 
  * @param {string} systemRoot path to the root directory
+ * @return {Promise} a Promise that is resolved with a success object on success else rejected with DevError
  */
 const renameFiles = async (files, systemRoot) => {
     const filepaths = Object.keys(files);
@@ -73,15 +73,20 @@ const renameFiles = async (files, systemRoot) => {
 
     for (const filepath of filepaths) {
         if (!util.isDescendantOf(systemRoot + filepath, systemRoot)) {
-            // the message of this error is unique - it is a JSON stringified object of file locations
+            // the message of this error is a JSON stringified object of file locations
             throw new DevError.DevError(DevError.EPATH, 400, {}, 'upload', JSON.stringify(locations));
         }
 
         try {
             await fsPromises.rename(files[filepath].path, systemRoot + filepath);
         } catch (error) {
-            console.log(error);
-            // the message of this error is unique - it is a JSON stringified object of file locations
+            if (error.code === 'ENOENT') {
+                // filesystem entry doesn't exist
+                // the message of this error is a JSON stringified object of file locations
+                throw new DevError.DevError(DevError.ENOENT, 409, {}, 'upload', JSON.stringify(locations));
+            }
+            // if all else fails
+            // the message of this error is a JSON stringified object of file locations
             throw new DevError.DevError(DevError.EMOVE, 500, {}, 'upload', JSON.stringify(locations));
         }
 
@@ -109,6 +114,7 @@ const renameFiles = async (files, systemRoot) => {
  * @param {IncomingMessage} request HTTP request
  * @param {string} systemRoot filepath of the root directory
  * @param {string} tmpDir filepath of the directory to put temporary files
+ * @return {Promise} a Promise that is resolved with a success object on success else rejected with DevError
  */
 exports.handle = async (request, systemRoot, tmpDir) => {
     // HTTP request method must be PUT
