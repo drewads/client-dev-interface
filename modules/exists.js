@@ -12,9 +12,9 @@ const fs = require('fs');
 const fsPromises = fs.promises;
 const url = require('url');
 
-const Success = require('./Success');
-const DevError = require('./DevError');
-const util = require('./util');
+const Success = require('./util/Success');
+const DevError = require('./util/DevError');
+const util = require('./util/util');
 
 /**
  * handle takes as input an HTTP request and a string that is the

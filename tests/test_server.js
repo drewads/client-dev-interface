@@ -108,8 +108,8 @@ http.createServer((request, response) => handleRequest(request, response)).liste
                 + `To use (command line + browser):\n`
                 + `navigate to the tests folder\n`
                 + `enter the command node test_server.js\n`
-                + `in the browser URL bar, type http://localhost:8080/test.html for general tests\n`
-                + `in the browser URL bar, type http://localhost:8080/uploadTest.html for upload tests\n`
+                + `in the browser URL bar, type http://localhost:${PORT}/test.html for general tests\n`
+                + `in the browser URL bar, type http://localhost:${PORT}/uploadTest.html for upload tests\n`
                 + `note that upload tests will add files to your machine's filesystem that must `
                 + `then be manually removed\n`);
 });

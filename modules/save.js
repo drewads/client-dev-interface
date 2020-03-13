@@ -8,11 +8,11 @@
 
 const fs = require('fs');
 const fsPromises = fs.promises;
-
-const Success = require('./Success');
-const DevError = require('./DevError');
 const url = require('url');
-const util = require('./util');
+
+const Success = require('./util/Success');
+const DevError = require('./util/DevError');
+const util = require('./util/util');
 
 /**
  * saveFile writes the string data given as the body parameter to the

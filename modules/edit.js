@@ -10,12 +10,12 @@
 
 const fs = require('fs');
 const fsPromises = fs.promises;
-
-const Success = require('./Success');
-const DevError = require('./DevError');
 const url = require('url');
 const mime = require('mime');
-const util = require('./util');
+
+const Success = require('./util/Success');
+const DevError = require('./util/DevError');
+const util = require('./util/util');
 
 /**
  * getFileContents reads the contents of a file and returns a

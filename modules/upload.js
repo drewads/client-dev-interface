@@ -9,11 +9,11 @@
 
 const fs = require('fs');
 const fsPromises = fs.promises;
-
-const Success = require('./Success');
-const DevError = require('./DevError');
-const util = require('./util');
 const formidable = require('formidable');
+
+const Success = require('./util/Success');
+const DevError = require('./util/DevError');
+const util = require('./util/util');
 
 /**
  * parseForm parses the HTTP request body as multipart/form-data,

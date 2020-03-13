@@ -11,9 +11,9 @@
 const fs = require('fs');
 const fsPromises = fs.promises;
 
-const Success = require('./Success');
-const DevError = require('./DevError');
-const util = require('./util');
+const Success = require('./util/Success');
+const DevError = require('./util/DevError');
+const util = require('./util/util');
 
 /**
  * checkBodyFormat takes a JavaScript object, which is the HTTP request body,

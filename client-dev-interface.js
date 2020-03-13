@@ -12,20 +12,20 @@
 
 // list of modules corresponding to filesystem actions
 const actions = {
-    'create' : require('./create'),
-    'edit' : require('./edit'),
-    'upload' : require('./upload'),
-    'move' : require('./move'),
-    'delete' : require('./delete.js'),
-    'save' : require('./save'),
-    'dir-snapshot' : require('./dir-snapshot'),
-    'exists' : require('./exists')
+    'create' : require('./modules/create'),
+    'edit' : require('./modules/edit'),
+    'upload' : require('./modules/upload'),
+    'move' : require('./modules/move'),
+    'delete' : require('./modules/delete.js'),
+    'save' : require('./modules/save'),
+    'dir-snapshot' : require('./modules/dir-snapshot'),
+    'exists' : require('./modules/exists')
 };
 
 const url = require('url');
 const os = require('os');
-const Success = require('./Success');   // gives access to Success object
-const DevError = require('./DevError'); // gives access to DevError object and error codes
+const Success = require('./modules/util/Success');   // gives access to Success object
+const DevError = require('./modules/util/DevError'); // gives access to DevError object and error codes
 
 // export both of these to the user of this module
 exports.Success = Success;
