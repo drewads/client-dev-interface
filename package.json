@@ -1,0 +1,27 @@
+{
+  "name": "client-dev-interface",
+  "version": "1.0.1",
+  "description": "Allows changes to be easily made to a server's filesystem from the client.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "formidable": "^1.2.2",
+    "mime": "^2.4.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drewads/client-dev-interface.git"
+  },
+  "author": "Drew Wadsworth",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/drewads/client-dev-interface/issues"
+  },
+  "homepage": "https://github.com/drewads/client-dev-interface#readme"
+}
