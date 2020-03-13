@@ -73,7 +73,7 @@ const takeSnapshot = async (dirPath) => {
  */
 exports.handle = async (request, systemRoot) => {
     // check that HTTP request method is GET
-    if (request.method !== 'GET') {
+    if (request.method.toUpperCase() !== 'GET') {
         throw new DevError.DevError(DevError.EMET, 405, {'Allow': 'GET'}, 'dir-snapshot',
                                     'method not allowed');
     }

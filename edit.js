@@ -34,7 +34,7 @@ const getFileContents = async (filepath) => {
     } catch (error) {
         if (error.code === 'ENOENT') {
             // doesn't exist
-            throw new DevError.DevError(DevError.ENOENT, 409, {}, 'edit',
+            throw new DevError.DevError(DevError.ENOENT, 404, {}, 'edit',
                                         'file does not exist');
         } else if (error.code === 'EISDIR') {
             // is a directory, not a regular file
@@ -64,7 +64,7 @@ const getFileContents = async (filepath) => {
  */
 exports.handle = async (request, systemRoot) => {
     // check that HTTP request method is GET
-    if (request.method !== 'GET') {
+    if (request.method.toUpperCase() !== 'GET') {
         throw new DevError.DevError(DevError.EMET, 405, {'Allow': 'GET'}, 'edit', 'method not allowed');
     }
 

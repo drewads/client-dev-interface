@@ -118,7 +118,7 @@ const renameFiles = async (files, systemRoot) => {
  */
 exports.handle = async (request, systemRoot, tmpDir) => {
     // HTTP request method must be PUT
-    if (request.method !== 'PUT') {
+    if (request.method.toUpperCase() !== 'PUT') {
         throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'PUT'}, 'upload', 'method not allowed');
     }
 

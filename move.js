@@ -77,7 +77,7 @@ const moveEntry = async (oldPath, newPath) => {
  * @return {Promise} resolved with Success object if move successful, DevError thrown otherwise
  */
 exports.handle = async (request, systemRoot) => {
-    if (request.method !== 'PATCH') {
+    if (request.method.toUpperCase() !== 'PATCH') {
         throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'PATCH'}, 'move', 'method not allowed');
     }
 

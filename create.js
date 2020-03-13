@@ -104,7 +104,7 @@ const createFile = async (path) => {
  * @return {Promise} resolved with Success object if create successful, DevError thrown otherwise
  */
 exports.handle = async (request, systemRoot) => {
-    if (request.method !== 'PUT') {
+    if (request.method.toUpperCase() !== 'PUT') {
         throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'PUT'}, 'create', 'method not allowed');
     }
 

@@ -52,7 +52,7 @@ exports.handle = async (request, systemRoot) => {
     
     try {
         await fsPromises.access(filepath);
-        return new Success.Success(200, {'Content-Type': 'application/json'}, 'exists',
+        return new Success.Success(200, {'Content-Type': 'text/plain'}, 'exists',
                                     'filesystem entry exists');
     } catch {
         throw new DevError.DevError(DevError.ENOENT, 404, {'Content-Type': 'text/plain'}, 'exists',

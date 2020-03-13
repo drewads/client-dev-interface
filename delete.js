@@ -76,7 +76,7 @@ const deleteObject = async (filepath, isDir) => {
  */
 exports.handle = async (request, systemRoot) => {
     // HTTP request method must be DELETE
-    if (request.method !== 'DELETE') {
+    if (request.method.toUpperCase() !== 'DELETE') {
         throw new DevError.DevError(DevError.EMET, 405, {'Allow' : 'DELETE'}, 'delete',
                                     'method not allowed');
     }
