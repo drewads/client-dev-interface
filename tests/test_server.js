@@ -14,7 +14,7 @@ const fs = require('fs');
 const fsPromises = fs.promises;
 const mime = require('mime');
 
-const cdi = require('./../client-dev-interface.js');
+const cdi = require('../../client-dev-interface');
 
 const devURLRegex = /^\/client-dev-interface/; // looks for '/client-dev-interface' at start of path
 const systemRoot = '.';
