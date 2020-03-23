@@ -32,7 +32,7 @@ const parseForm = async (request, tmpDir) => {
     return new Promise((resolve, reject) => {
         formParser.parse(request, (error, fields, files) => {
             if (error) {
-                reject(new DevError.DevError(DevError.EBODY, 400, {}, 'delete',
+                reject(new DevError.DevError(DevError.EBODY, 400, {}, 'upload',
                                             'request body has incorrect format'));
             } else {
                 resolve({fields : fields, files : files});
