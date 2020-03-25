@@ -10,6 +10,7 @@
 'use strict';
 
 const DONE_STATE = 4; // when the HTTP request is completely finished, including response
+const PORT = 8000;  // port the test server is listening to
 
 /**
  * compareAndPrintResults compares the HTTP response body to the expected response
@@ -88,7 +89,7 @@ const genericTestWithHeaders = (method, devModule, headers, body, testName, expe
         }
 
         // devModule has no file extension
-        request.open(method, 'http://localhost:8080/client-dev-interface/' + devModule);
+        request.open(method, `http://localhost:${PORT}/client-dev-interface/${devModule}`);
         
         // handles a JavaScript object containing request header key-value pairs
         for (const header in headers) {

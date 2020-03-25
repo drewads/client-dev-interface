@@ -4,6 +4,7 @@
  */
 
 const DONE_STATE = 4; // when the HTTP request is completely finished, including response
+const PORT = 8000;  // port the test server is listening to
 
  /**
   * uploadFiles sends an HTTP request with multipart/form-data body
@@ -34,7 +35,7 @@ const uploadFiles = (files, dir, requestMethod, altBody = null) => {
             }
         }
 
-        upload.open(requestMethod, 'http://localhost:8080/client-dev-interface/upload');
+        upload.open(requestMethod, `http://localhost:${PORT}/client-dev-interface/upload`);
         upload.send((altBody ? altBody : uploadForm));
     });
 }

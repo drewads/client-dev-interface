@@ -1,24 +1,24 @@
 /**
  * test_server.js contains the server used to test client-dev-interface.
  * To use (command line + browser):
- * * navigate to the tests folder
- * * enter the command node test_server.js
- * * in the browser URL bar, type http://localhost:8080/test.html for general tests
- * * in the browser URL bar, type http://localhost:8080/uploadTest.html for upload tests
+ * * enter the command 'npm test' to run this server
+ * * in the browser URL bar, type http://localhost:8000/test.html for general tests
+ * * in the browser URL bar, type http://localhost:8000/uploadTest.html for upload tests
  * * note that upload tests will add files to your machine's filesystem that must then be manually removed
  */
 
 const http = require('http');
+const path = require('path');
 const url = require('url');
 const fs = require('fs');
 const fsPromises = fs.promises;
 const mime = require('mime');
 
-const cdi = require('../../client-dev-interface');
+const cdi = require(path.join(__dirname, '../../client-dev-interface'));
 
 const devURLRegex = /^\/client-dev-interface/; // looks for '/client-dev-interface' at start of path
-const systemRoot = '.';
-const PORT = 8080;
+const systemRoot = __dirname;
+const PORT = 8000;
 
 /**
  * Acts like a struct to store and pass the parameters that make up an HTTP response
@@ -94,7 +94,7 @@ const handleRequest = async (request, response) => {
                                             'Error 405: Method Not Allowed');
     } else {
         // normal fileserver here
-        responseParams = await serveFile('.' + query.pathname);
+        responseParams = await serveFile(path.join(__dirname, query.pathname));
     }
 
     response.writeHead(responseParams.statusCode, responseParams.headers);
@@ -106,8 +106,7 @@ http.createServer((request, response) => handleRequest(request, response)).liste
     // print instructions for use to command line
     console.log(`client-dev-interface test server listening on port ${PORT}.\n`
                 + `To use (command line + browser):\n`
-                + `navigate to the tests folder\n`
-                + `enter the command node test_server.js\n`
+                + `enter the command \'npm test\' if this server isn't running already\n`
                 + `in the browser URL bar, type http://localhost:${PORT}/test.html for general tests\n`
                 + `in the browser URL bar, type http://localhost:${PORT}/uploadTest.html for upload tests\n`
                 + `note that upload tests will add files to your machine's filesystem that must `
