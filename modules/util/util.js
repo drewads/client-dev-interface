@@ -58,7 +58,11 @@ exports.getBodyAsJSON = async (request) => {
  * @return {boolean} true if dir is a descendant of root
  */
 exports.isDescendantOf = (dir, root) => {
-    const dirResolved = path.resolve(dir);      // remove .. and .
-    const rootResolved = path.resolve(root);    // remove .. and .
+    let dirResolved = path.resolve(dir);      // remove .. and .
+    let rootResolved = path.resolve(root);    // remove .. and .
+
+    dirResolved += (dirResolved.endsWith('/') ? '' : '/');      // add trailing slashes
+    rootResolved += (rootResolved.endsWith('/') ? '' : '/');    // add trailing slashes
+
     return dirResolved.startsWith(rootResolved);
 }

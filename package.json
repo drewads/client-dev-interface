@@ -1,6 +1,6 @@
 {
   "name": "client-dev-interface",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Allows changes to be easily made to a server's filesystem from the client.",
   "main": "index.js",
   "directories": {
